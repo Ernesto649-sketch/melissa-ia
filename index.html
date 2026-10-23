@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Melissa IA v6.5 - MAPG</title>
+  <style>
+    /* =========================================================
+       VARIABLES Y TEMAS DE COLOR (Negro Profundo + Azul)
+       ========================================================= */
+    :root {
+      --bg-primary: #f4f7fb;
+      --bg-surface: #ffffff;
+      --bg-chat-user: #0066ff;
+      --text-user: #ffffff;
+      --bg-chat-ai: #eef3fc;
+      --text-ai: #1c2536;
+      --text-main: #1c2536;
+      --text-muted: #64748b;
+      --accent-blue: #0066ff;
+      --accent-hover: #0052cc;
+      --border-color: #e2e8f0;
+      --shadow-color: rgba(0, 102, 255, 0.08);
+      --card-bg: #f8fafc;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #08090d;
+      --bg-surface: #10131c;
+      --bg-chat-user: #0066ff;
+      --text-user: #ffffff;
+      --bg-chat-ai: #161b26;
+      --text-ai: #f1f5f9;
+      --text-main: #f1f5f9;
+      --text-muted: #8b9bb4;
+      --accent-blue: #0066ff;
+      --accent-hover: #1e6eff;
+      --border-color: #232a3b;
+      --shadow-color: rgba(0, 0, 0, 0.7);
+      --card-bg: #161a24;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100vh;
+      height: -webkit-fill-available;
+      width: 100vw;
+      overflow: hidden;
+      position: fixed;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* =========================================================
+       HEADER / BARRA SUPERIOR
+       ========================================================= */
+    header {
+      background-color: var(--bg-surface);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 2px 10px var(--shadow-color);
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar-ai {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0066ff, #00d2ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      box-shadow: 0 4px 10px rgba(0, 102, 255, 0.4);
+      flex-shrink: 0;
+    }
+
+    .brand-info h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .brand-info span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .badge-map {
+      background: rgba(0, 102, 255, 0.15);
+      color: var(--accent-blue);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.7rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .btn-icon:hover {
+      background-color: var(--bg-primary);
+      color: var(--accent-blue);
+      border-color: var(--accent-blue);
+    }
+
+    /* =========================================================
+       ÁREA DE CHAT / MENSAJES Y FOTOS
+       ========================================================= */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .message {
+      max-width: 88%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      animation: fadeIn 0.25s ease-in-out;
+      word-wrap: break-word;
+    }
+
+    .message img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 8px;
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background-color: var(--bg-chat-user);
+      color: var(--text-user);
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25);
+    }
+
+    .message.ai {
+      align-self: flex-start;
+      background-color: var(--bg-chat-ai);
+      color: var(--text-ai);
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--border-color);
+    }
+
+    .speak-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      margin-top: 8px;
+      padding: 0;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      background: rgba(0, 102, 255, 0.12);
+      color: var(--accent-blue);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .speak-btn svg { width: 17px; height: 17px; fill: currentColor; }
+    .speak-btn.speaking { background: var(--accent-blue); color: #fff; }
+
+    .msg-actions{display:flex;align-items:center;gap:8px;margin-top:8px}
+    .msg-actions .speak-btn{margin-top:0}
+    .speak-time{font-size:.72rem;color:var(--accent-blue)}
+    .fr.leyendo{background:rgba(0,102,255,.3);border-radius:4px}
+    .acc-body{display:none;padding:8px 2px 4px;color:var(--text-ai)}
+    .acc-body.show{display:block}
+    .acc-body select,.acc-body input[type=range]{width:100%;margin:6px 0}
+    .acc-body select{background:var(--bg-chat-ai);color:var(--text-ai);border:1px solid var(--border-color);border-radius:10px;padding:8px}
+    .btn-mini{border:1px solid var(--border-color);background:var(--bg-chat-ai);color:var(--text-ai);padding:7px 12px;border-radius:10px;font-size:.8rem;cursor:pointer}
+    .btn-mini.pri{background:var(--accent-blue);color:#fff;border-color:var(--accent-blue)}
+    .ia-card{border:1px solid var(--border-color);border-radius:12px;padding:10px;margin:8px 0;font-size:.82rem;color:var(--text-ai)}
+    .ia-card.act{border-color:var(--accent-blue)}
+    .ia-card h4{margin:0 0 4px;font-size:.9rem}
+    .ia-bar{height:5px;background:var(--border-color);border-radius:3px;overflow:hidden;margin-top:6px}
+    .ia-bar>i{display:block;height:100%;width:0;background:var(--accent-blue)}
+    .chat-row{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border-color);border-radius:12px;margin:6px 0;color:var(--text-ai)}
+    .chat-row.sel{border-color:var(--accent-blue)}
+    .chat-t{flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.88rem}
+    .chat-del{background:none;border:0;cursor:pointer;font-size:1rem}
+
+    .web-search-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(0, 102, 255, 0.15);
+      color: var(--accent-blue);
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    /* =========================================================
+       BARRA DE ENTRADA DE TEXTO (SIN MICRÓFONO)
+       ========================================================= */
+    footer {
+      background-color: var(--bg-surface);
+      padding: 10px 14px;
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .input-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 28px;
+      padding: 4px 6px 4px 16px;
+      box-shadow: 0 2px 8px var(--shadow-color);
+    }
+
+    .input-container:focus-within {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.25);
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn-action {
+      background-color: var(--accent-blue);
+      color: white;
+      border: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .btn-action:hover {
+      background-color: var(--accent-hover);
+    }
+
+    /* =========================================================
+       MODAL DE AJUSTES
+       ========================================================= */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 460px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      transform: translateY(15px);
+      transition: transform 0.25s ease;
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-header h2 {
+      font-size: 1.15rem;
+      color: var(--text-main);
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .setting-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding-right: 12px;
+    }
+
+    .setting-info label {
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--text-main);
+    }
+
+    .setting-info span {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* Switch toggle */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent-blue);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    /* MOTOR DE BÚSQUEDA */
+    .search-engine-section {
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 0;
+    }
+
+    .accordion-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .accordion-toggle .arrow {
+      transition: transform 0.3s ease;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .accordion-toggle.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .engine-options {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+      padding-left: 4px;
+    }
+
+    .engine-options.show {
+      display: flex;
+    }
+
+    .engine-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background-color: var(--card-bg);
+      cursor: pointer;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .engine-option.selected {
+      border-color: var(--accent-blue);
+      background-color: rgba(0, 102, 255, 0.12);
+    }
+
+    .engine-logo {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .engine-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      flex: 1;
+    }
+
+    .engine-radio {
+      accent-color: var(--accent-blue);
+    }
+
+    .app-info-card {
+      margin-top: 16px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .app-info-card h3 {
+      font-size: 0.9rem;
+      color: var(--accent-blue);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .app-info-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 4px;
+    }
+
+    .app-info-card strong {
+      color: var(--text-main);
+    }
+  </style>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0a0d14">
+  <link rel="icon" href="icon-192.png">
+</head>
+<body data-theme="dark">
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand-container">
+      <div class="avatar-ai">M</div>
+      <div class="brand-info">
+        <h1>Melissa IA</h1>
+        <span>por <span class="badge-map">MAPG</span> • v6.5</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" id="btnChats" title="Chats recientes">🕘</button>
+      <button class="btn-icon" id="btnSettings" title="Ajustes">⚙️</button>
+    </div>
+  </header>
+
+  <!-- ÁREA DE CHAT -->
+  <main id="chatBox">
+    <div class="message ai">
+      Hola, soy Melissa IA. ¿En qué puedo ayudarte hoy?
+    </div>
+  </main>
+
+  <!-- FOOTER / INPUT (SIN MICRÓFONO) -->
+  <footer>
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Escribe a Melissa IA..." autocomplete="off" />
+      <button class="btn-action" id="btnSend" title="Enviar">➔</button>
+    </div>
+  </footer>
+
+  <!-- MODAL DE AJUSTES -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Ajustes</h2>
+        <button class="btn-close" id="btnCloseSettings">✕</button>
+      </div>
+
+      <!-- MODO OSCURO -->
+      <div class="setting-item">
+        <div class="setting-info">
+          <label>Modo Oscuro</label>
+          <span>Negro profundo con acentos en azul brillante</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleDarkMode" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- BÚSQUEDA WEB -->
+      <div class="setting-item">
+        <div class="setting-info">
+          <label>Búsqueda en la web</label>
+          <span>Abrir búsquedas en una nueva pestaña</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleWebSearch">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- MOTOR DE BÚSQUEDA -->
+      <div class="search-engine-section">
+        <div class="accordion-toggle" id="searchEngineToggle">
+          <div class="setting-info">
+            <label>Motor de Búsqueda</label>
+            <span id="currentEngineText">Motor actual: Google</span>
+          </div>
+          <span class="arrow">▼</span>
+        </div>
+
+        <div class="engine-options" id="engineOptions">
+          <div class="engine-option selected" data-engine="google" data-url="https://www.google.com/search?q=">
+            <svg class="engine-logo" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span class="engine-name">Google</span>
+            <input type="radio" name="engine" class="engine-radio" checked />
+          </div>
+
+          <div class="engine-option" data-engine="bing" data-url="https://www.bing.com/search?q=">
+            <svg class="engine-logo" viewBox="0 0 24 24">
+              <path fill="#00838F" d="M5 3v18l5.5-3.2V11.2l5.7 3.3 2.8-1.6L10.5 7.7V3H5z"/>
+            </svg>
+            <span class="engine-name">Microsoft Bing</span>
+            <input type="radio" name="engine" class="engine-radio" />
+          </div>
+
+          <div class="engine-option" data-engine="ddg" data-url="https://duckduckgo.com/?q=">
+            <svg class="engine-logo" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="#DE5833"/>
+              <circle cx="12" cy="12" r="7" fill="#FFF"/>
+              <circle cx="12" cy="10" r="3" fill="#2B2B2B"/>
+            </svg>
+            <span class="engine-name">DuckDuckGo</span>
+            <input type="radio" name="engine" class="engine-radio" />
+          </div>
+        </div>
+      </div>
+
+      <!-- LECTURA Y VOZ -->
+      <div class="setting-item">
+        <div class="setting-info"><label>Lectura automática</label><span>Melissa lee sus respuestas sola</span></div>
+        <label class="switch"><input type="checkbox" id="toggleAuto"><span class="slider"></span></label>
+      </div>
+      <div class="search-engine-section">
+        <div class="accordion-toggle" data-acc="vozBody">
+          <div class="setting-info"><label>Voz</label><span>Elegir voz y velocidad</span></div>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="acc-body" id="vozBody">
+          <select id="selVoz"></select>
+          <span id="rateTxt" style="font-size:.8rem">Velocidad: 1.0x</span>
+          <input type="range" id="rngRate" min="0.6" max="1.4" step="0.1" value="1">
+          <button class="btn-mini pri" id="btnProbarVoz" type="button">▶ Probar voz</button>
+        </div>
+      </div>
+
+      <!-- IA LOCAL -->
+      <div class="search-engine-section">
+        <div class="accordion-toggle" data-acc="iaBody">
+          <div class="setting-info"><label>IA</label><span>Modo IA local (experimental)</span></div>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="acc-body" id="iaBody">
+          <div style="font-size:.78rem;color:var(--text-ai)">Corre un modelo pequeño en tu teléfono con la GPU (WebGPU). Se descarga una vez; usa Wi-Fi.</div>
+          <div id="iaModelos"></div>
+          <div id="iaEstado" style="font-size:.78rem;color:var(--text-ai)"></div>
+          <div class="ia-bar"><i id="iaBarra"></i></div>
+        </div>
+      </div>
+
+      <!-- INFORMACIÓN DE LA APP -->
+      <div class="app-info-card">
+        <h3>ℹ️ Información de la App</h3>
+        <p><strong>Nombre:</strong> Melissa IA</p>
+        <p><strong>Desarrollador:</strong> MAPG.IA</p>
+        <p><strong>Detalles:</strong> Empresa mexicana de inteligencia artificial</p>
+        <p><strong>Versión:</strong> 6.5</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHATS RECIENTES -->
+  <div class="modal-overlay" id="chatsModal">
+    <div class="modal">
+      <div class="modal-header"><h2>Chats recientes</h2><button class="btn-close" id="btnCloseChats">✕</button></div>
+      <button class="btn-mini pri" id="btnNuevoChat" type="button">＋ Nuevo chat</button>
+      <div id="listaChats"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPT LÓGICO DE MELISSA IA v6.0 -->
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const btnSend = document.getElementById('btnSend');
+    const btnSettings = document.getElementById('btnSettings');
+    const btnCloseSettings = document.getElementById('btnCloseSettings');
+    const settingsModal = document.getElementById('settingsModal');
+    const toggleDarkMode = document.getElementById('toggleDarkMode');
+    const toggleWebSearch = document.getElementById('toggleWebSearch');
+
+    const searchEngineToggle = document.getElementById('searchEngineToggle');
+    const engineOptions = document.getElementById('engineOptions');
+    const currentEngineText = document.getElementById('currentEngineText');
+
+    let webSearchActive = false;
+    let selectedSearchUrl = 'https://www.google.com/search?q=';
+    let selectedEngineName = 'Google';
+    let esperandoTemaTerror = false;
+
+    // ACCORDEÓN Y SELECCIÓN DE MOTOR DE BÚSQUEDA
+    searchEngineToggle.addEventListener('click', () => {
+      searchEngineToggle.classList.toggle('open');
+      engineOptions.classList.toggle('show');
+    });
+
+    const engineOptionDivs = document.querySelectorAll('.engine-option');
+    engineOptionDivs.forEach(option => {
+      option.addEventListener('click', () => {
+        engineOptionDivs.forEach(o => {
+          o.classList.remove('selected');
+          o.querySelector('.engine-radio').checked = false;
+        });
+        option.classList.add('selected');
+        option.querySelector('.engine-radio').checked = true;
+
+        selectedSearchUrl = option.getAttribute('data-url');
+        selectedEngineName = option.querySelector('.engine-name').innerText;
+        currentEngineText.innerText = `Motor actual: ${selectedEngineName}`;
+      });
+    });
+
+    // MODAL DE AJUSTES Y MODO OSCURO NEGRO/AZUL
+    btnSettings.addEventListener('click', () => settingsModal.classList.add('active'));
+    btnCloseSettings.addEventListener('click', () => settingsModal.classList.remove('active'));
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) settingsModal.classList.remove('active');
+    });
+
+    toggleDarkMode.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        document.body.setAttribute('data-theme', 'dark');
+      } else {
+        document.body.removeAttribute('data-theme');
+      }
+    });
+
+    toggleWebSearch.addEventListener('change', (e) => {
+      webSearchActive = e.target.checked;
+    });
+
+    // ENVÍO DE MENSAJES
+    btnSend.addEventListener('click', handleSendMessage);
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSendMessage();
+    });
+
+    // =========================================================
+    // v6.5: CONFIG, MEMORIA, CHATS, VOZ, COPIAR E IA LOCAL
+    // =========================================================
+    const LS = {
+      get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+      set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    };
+    const cfg = Object.assign({ voz: '', rate: 1, auto: false, iaOn: false, modelo: 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC', descargados: [] }, LS.get('melissa_cfg', {}));
+    const mem = Object.assign({ nombre: '', notas: [] }, LS.get('melissa_mem', {}));
+    let chats = LS.get('melissa_chats', []);
+    let chatActual = LS.get('melissa_chat_actual', null);
+    let restaurando = false;
+    const guardarCfg = () => LS.set('melissa_cfg', cfg);
+    const guardarMem = () => LS.set('melissa_mem', mem);
+    const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+    const ICONO_VOZ = '<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/></svg>';
+    const ICONO_PARAR = '<svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>';
+    const ICONO_COPIA = '<svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>';
+    const ICONO_OK = '<svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>';
+    const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F]/gu;
+
+    // ---------- Chats guardados ----------
+    function chatActivo() {
+      let c = chats.find(x => x.id === chatActual);
+      if (!c) { c = { id: Date.now(), titulo: 'Chat nuevo', msgs: [] }; chats.unshift(c); chatActual = c.id; LS.set('melissa_chat_actual', chatActual); }
+      return c;
+    }
+    function guardarMensaje(content, sender, w) {
+      const c = chatActivo();
+      if (sender === 'user' && c.titulo === 'Chat nuevo') c.titulo = content.replace(/&amp;|&lt;|&gt;/g, ' ').slice(0, 40);
+      c.msgs.push({ c: content, s: sender, w: !!w });
+      LS.set('melissa_chats', chats);
+    }
+    function mostrarChat() {
+      detenerLectura();
+      chatBox.innerHTML = '';
+      restaurando = true;
+      appendMessage('Hola' + (mem.nombre ? ', ' + esc(mem.nombre) : '') + ', soy Melissa IA. ¿En qué puedo ayudarte hoy?', 'ai');
+      const c = chats.find(x => x.id === chatActual);
+      if (c) c.msgs.forEach(m => appendMessage(m.c, m.s, m.w));
+      restaurando = false;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    const chatsModal = document.getElementById('chatsModal');
+    function renderChats() {
+      const l = document.getElementById('listaChats');
+      l.innerHTML = '';
+      chats.filter(c => c.msgs.length).forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'chat-row' + (c.id === chatActual ? ' sel' : '');
+        row.innerHTML = '<span class="chat-t"></span><button class="chat-del" aria-label="Borrar">🗑️</button>';
+        row.querySelector('.chat-t').textContent = c.titulo;
+        row.querySelector('.chat-t').onclick = () => { chatActual = c.id; LS.set('melissa_chat_actual', chatActual); mostrarChat(); chatsModal.classList.remove('active'); };
+        row.querySelector('.chat-del').onclick = () => {
+          chats = chats.filter(x => x.id !== c.id); LS.set('melissa_chats', chats);
+          if (c.id === chatActual) { chatActual = null; LS.set('melissa_chat_actual', null); mostrarChat(); }
+          renderChats();
+        };
+        l.appendChild(row);
+      });
+      if (!l.children.length) l.textContent = 'Aún no hay chats guardados.';
+    }
+    document.getElementById('btnChats').addEventListener('click', () => { renderChats(); chatsModal.classList.add('active'); });
+    document.getElementById('btnCloseChats').addEventListener('click', () => chatsModal.classList.remove('active'));
+    chatsModal.addEventListener('click', e => { if (e.target === chatsModal) chatsModal.classList.remove('active'); });
+    document.getElementById('btnNuevoChat').addEventListener('click', () => { chatActual = null; LS.set('melissa_chat_actual', null); mostrarChat(); chatsModal.classList.remove('active'); });
+
+    // ---------- Memoria ----------
+    function comandoMemoria(t) {
+      const q = t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      let m;
+      if ((m = t.match(/^(?:recuerda|acuerdate|acuérdate|anota)(?: que)?\s+(.+)/i))) { mem.notas.push(m[1].trim()); guardarMem(); return '🧠 Listo, lo guardé: <i>' + esc(m[1].trim()) + '</i>'; }
+      if ((m = t.match(/(?:me llamo|mi nombre es|llámame|llamame)\s+([A-Za-zÁÉÍÓÚáéíóúÑñ]+)/i))) { mem.nombre = m[1]; guardarMem(); return '🧠 Mucho gusto, ' + esc(m[1]) + '. Ya recordaré tu nombre.'; }
+      if (/que recuerdas|que sabes de mi/.test(q)) {
+        if (!mem.nombre && !mem.notas.length) return '🧠 Aún no me has pedido recordar nada. Prueba con: <i>recuerda que me gusta el terror</i>.';
+        return '🧠 Esto recuerdo:<br>' + (mem.nombre ? 'Te llamas ' + esc(mem.nombre) + '.<br>' : '') + mem.notas.map(n => '• ' + esc(n)).join('<br>');
+      }
+      if (/olvida todo|borra mi memoria/.test(q)) { mem.nombre = ''; mem.notas = []; guardarMem(); return '🧠 Listo, borré lo que sabía de ti.'; }
+      return null;
+    }
+
+    // ---------- Enviar y mostrar mensajes ----------
+    function handleSendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      appendMessage(esc(text), 'user');
+      userInput.value = '';
+
+      if (webSearchActive) {
+        appendMessage(`🔍 Buscando en ${selectedEngineName} en una nueva pestaña...`, 'ai', true);
+        const searchUrl = `${selectedSearchUrl}${encodeURIComponent(text)}`;
+        window.open(searchUrl, '_blank');
+        return;
+      }
+      const rm = comandoMemoria(text);
+      if (rm) { setTimeout(() => appendMessage(rm, 'ai'), 300); return; }
+      if (cfg.iaOn && iaEngine) { responderIA(text); return; }
+      setTimeout(() => appendMessage(getLocalDatabaseResponse(text), 'ai'), 300);
+    }
+
+    function appendMessage(content, sender, isWebSearch = false, opts = {}) {
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message', sender);
+      const body = document.createElement('div');
+      body.className = 'msg-body';
+      body.innerHTML = isWebSearch ? `<span class="web-search-badge">🌐 ${selectedEngineName}</span><br>${content}` : content;
+      msgDiv.appendChild(body);
+      if (sender === 'ai') {
+        const bar = document.createElement('div');
+        bar.className = 'msg-actions';
+        bar.innerHTML = `<button type="button" class="speak-btn" aria-label="Escuchar">${ICONO_VOZ}</button><button type="button" class="speak-btn" aria-label="Copiar">${ICONO_COPIA}</button><span class="speak-time"></span>`;
+        bar.children[0].addEventListener('click', () => leerMensaje(msgDiv, bar.children[0]));
+        bar.children[1].addEventListener('click', () => copiarMensaje(msgDiv, bar.children[1]));
+        msgDiv.appendChild(bar);
+      }
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      if (!restaurando && !opts.noSave) guardarMensaje(content, sender, isWebSearch);
+      if (sender === 'ai' && cfg.auto && !restaurando && !opts.noAuto) leerMensaje(msgDiv, msgDiv.querySelector('.speak-btn'));
+      return msgDiv;
+    }
+
+    // ---------- Copiar ----------
+    function copiarMensaje(msgDiv, btn) {
+      const clon = msgDiv.querySelector('.msg-body').cloneNode(true);
+      clon.querySelectorAll('.web-search-badge').forEach(e => e.remove());
+      clon.querySelectorAll('br').forEach(e => e.replaceWith('\n'));
+      const t = (clon.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
+      const ok = () => { btn.innerHTML = ICONO_OK; setTimeout(() => { btn.innerHTML = ICONO_COPIA; }, 1500); };
+      const alt = () => {
+        const ta = document.createElement('textarea');
+        ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); ok(); } catch (e) {}
+        ta.remove();
+      };
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, alt); else alt();
+    }
+
+    // ---------- Lectura en voz alta con seguimiento ----------
+    let botonHablando = null, timerLec = null;
+    function detenerLectura() {
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      clearInterval(timerLec);
+      document.querySelectorAll('.leyendo').forEach(e => e.classList.remove('leyendo'));
+      if (botonHablando) { botonHablando.classList.remove('speaking'); botonHablando.innerHTML = ICONO_VOZ; botonHablando = null; }
+    }
+    function envolverFrases(body) {
+      if (body.dataset.frases) return;
+      const w = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+      const nodos = [];
+      while (w.nextNode()) nodos.push(w.currentNode);
+      nodos.forEach(n => {
+        if (!n.nodeValue.trim() || n.parentElement.closest('.web-search-badge')) return;
+        const frag = document.createDocumentFragment();
+        (n.nodeValue.match(/[^.!?…]+[.!?…]*\s*/g) || [n.nodeValue]).forEach(p => {
+          const sp = document.createElement('span'); sp.className = 'fr'; sp.textContent = p; frag.appendChild(sp);
+        });
+        n.replaceWith(frag);
+      });
+      body.dataset.frases = '1';
+    }
+    function elegirVoz() {
+      const v = speechSynthesis.getVoices();
+      return v.find(x => x.name === cfg.voz) || v.find(x => x.lang === 'es-MX') || v.find(x => x.lang && x.lang.startsWith('es'));
+    }
+    function leerMensaje(msgDiv, btn) {
+      if (!('speechSynthesis' in window)) { alert('Tu navegador no soporta lectura en voz alta.'); return; }
+      const mismo = (botonHablando === btn);
+      detenerLectura();
+      if (mismo) return;
+      const body = msgDiv.querySelector('.msg-body');
+      envolverFrases(body);
+      const frases = [...body.querySelectorAll('.fr')]
+        .map(f => ({ f, t: f.textContent.replace(EMOJI, '').replace(/\s+/g, ' ').trim() }))
+        .filter(x => /[\p{L}\p{N}]/u.test(x.t));
+      if (!frases.length) return;
+      const voz = elegirVoz();
+      botonHablando = btn; btn.classList.add('speaking'); btn.innerHTML = ICONO_PARAR;
+      const reloj = msgDiv.querySelector('.speak-time');
+      let seg = 0; reloj.textContent = '0 s';
+      timerLec = setInterval(() => { seg++; reloj.textContent = seg + ' s'; }, 1000);
+      frases.forEach((x, i) => {
+        const u = new SpeechSynthesisUtterance(x.t);
+        u.lang = voz ? voz.lang : 'es-MX'; if (voz) u.voice = voz; u.rate = cfg.rate;
+        u.onstart = () => {
+          document.querySelectorAll('.leyendo').forEach(e => e.classList.remove('leyendo'));
+          x.f.classList.add('leyendo');
+          x.f.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        };
+        if (i === frases.length - 1) u.onend = u.onerror = () => { if (botonHablando === btn) detenerLectura(); };
+        speechSynthesis.speak(u);
+      });
+    }
+
+    // ---------- Ajustes: voz ----------
+    const selVoz = document.getElementById('selVoz'), rngRate = document.getElementById('rngRate'), rateTxt = document.getElementById('rateTxt');
+    function poblarVoces() {
+      if (!('speechSynthesis' in window)) { selVoz.innerHTML = '<option>Sin soporte de voz</option>'; return; }
+      const es = speechSynthesis.getVoices().filter(v => v.lang && v.lang.startsWith('es'));
+      selVoz.innerHTML = es.length ? es.map(v => `<option value="${v.name}">${v.name} (${v.lang})</option>`).join('') : '<option value="">Voz por defecto</option>';
+      const e = elegirVoz(); if (e) selVoz.value = e.name;
+    }
+    if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = poblarVoces;
+    poblarVoces();
+    selVoz.addEventListener('change', () => { cfg.voz = selVoz.value; guardarCfg(); });
+    rngRate.value = cfg.rate; rateTxt.textContent = 'Velocidad: ' + Number(cfg.rate).toFixed(1) + 'x';
+    rngRate.addEventListener('input', () => { cfg.rate = parseFloat(rngRate.value); rateTxt.textContent = 'Velocidad: ' + cfg.rate.toFixed(1) + 'x'; guardarCfg(); });
+    document.getElementById('btnProbarVoz').addEventListener('click', () => {
+      if (!('speechSynthesis' in window)) return;
+      detenerLectura();
+      const u = new SpeechSynthesisUtterance('Hola, soy Melissa IA. Así suena mi voz.');
+      const v = elegirVoz(); u.lang = v ? v.lang : 'es-MX'; if (v) u.voice = v; u.rate = cfg.rate;
+      speechSynthesis.speak(u);
+    });
+    const toggleAuto = document.getElementById('toggleAuto');
+    toggleAuto.checked = cfg.auto;
+    toggleAuto.addEventListener('change', () => { cfg.auto = toggleAuto.checked; guardarCfg(); });
+    document.querySelectorAll('[data-acc]').forEach(t => t.addEventListener('click', () => {
+      t.classList.toggle('open'); document.getElementById(t.dataset.acc).classList.toggle('show');
+    }));
+
+    // ---------- IA local (WebLLM + WebGPU) ----------
+    const MODELOS = [
+      { id: 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC', n: 'Qwen 2.5 · 0.5B', mb: '≈ 400 MB', vel: 'Muy rápido', cal: 'Básica', rec: true, desc: 'Ligero y rápido. Recomendado para empezar.' },
+      { id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC', n: 'Llama 3.2 · 1B', mb: '≈ 700 MB', vel: 'Rápido', cal: 'Media', desc: 'Equilibrado: responde mejor que el ligero.' },
+      { id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', n: 'Qwen 2.5 · 1.5B', mb: '≈ 1 GB', vel: 'Medio', cal: 'La mejor de la lista', desc: 'El más pesado (menos de 1.5 GB). Puede fallar en algunos teléfonos.' }
+    ];
+    const WEBLLM_URL = 'https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.79/+esm';
+    let iaEngine = null, iaModelId = null, webllm = null, iaCargando = false;
+    const iaEstado = document.getElementById('iaEstado'), iaBarra = document.getElementById('iaBarra');
+
+    function renderModelos() {
+      document.getElementById('iaModelos').innerHTML = MODELOS.map(m => {
+        const act = cfg.iaOn && iaEngine && iaModelId === m.id;
+        const desc = cfg.descargados.includes(m.id);
+        return `<div class="ia-card${act ? ' act' : ''}"><h4>${m.n}${m.rec ? ' ⭐' : ''}</h4>
+          <div>📦 ${m.mb} · ⚡ ${m.vel} · 🎯 ${m.cal}</div><div>${m.desc}</div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-mini pri" data-a="${act ? 'off' : 'on'}" data-id="${m.id}">${act ? 'Desactivar' : (desc ? 'Usar' : 'Descargar y usar')}</button>
+          ${desc ? `<button class="btn-mini" data-a="del" data-id="${m.id}">Borrar</button>` : ''}</div></div>`;
+      }).join('');
+    }
+    async function cargarLib() { return webllm || (webllm = await import(WEBLLM_URL)); }
+    async function apagarIA() {
+      if (iaEngine) { try { await iaEngine.unload(); } catch (e) {} }
+      iaEngine = null; iaModelId = null; cfg.iaOn = false; guardarCfg();
+    }
+    async function cargarModelo(id) {
+      if (!navigator.gpu) { iaEstado.textContent = '⚠️ Tu navegador no tiene WebGPU. Melissa sigue con sus respuestas normales.'; cfg.iaOn = false; guardarCfg(); renderModelos(); return; }
+      try {
+        iaEstado.textContent = 'Preparando…'; iaBarra.style.width = '0';
+        await apagarIA();
+        const lib = await cargarLib();
+        iaEngine = await lib.CreateMLCEngine(id, { initProgressCallback: p => { iaEstado.textContent = p.text; iaBarra.style.width = Math.round((p.progress || 0) * 100) + '%'; } });
+        iaModelId = id; cfg.modelo = id; cfg.iaOn = true;
+        if (!cfg.descargados.includes(id)) cfg.descargados.push(id);
+        guardarCfg(); iaEstado.textContent = '✅ IA local lista.'; iaBarra.style.width = '100%';
+      } catch (e) {
+        iaEngine = null; cfg.iaOn = false; guardarCfg();
+        iaEstado.textContent = '⚠️ No se pudo cargar la IA (' + (e.message || e) + '). Melissa vuelve a sus respuestas normales.';
+      }
+      renderModelos();
+    }
+    document.getElementById('iaModelos').addEventListener('click', async e => {
+      const b = e.target.closest('button');
+      if (!b || iaCargando) return;
+      const id = b.dataset.id, a = b.dataset.a;
+      iaCargando = true;
+      if (a === 'on') await cargarModelo(id);
+      else if (a === 'off') { await apagarIA(); iaEstado.textContent = 'IA local desactivada.'; iaBarra.style.width = '0'; renderModelos(); }
+      else if (a === 'del') {
+        if (iaModelId === id) await apagarIA();
+        try { const lib = await cargarLib(); await lib.deleteModelAllInfoInCache(id); } catch (err) {}
+        cfg.descargados = cfg.descargados.filter(x => x !== id); guardarCfg(); iaEstado.textContent = 'Modelo borrado.'; renderModelos();
+      }
+      iaCargando = false;
+    });
+    async function responderIA(texto) {
+      const div = appendMessage('…', 'ai', false, { noSave: true, noAuto: true });
+      const body = div.querySelector('.msg-body');
+      const sistema = 'Eres Melissa IA, una asistente mexicana de MAPG.IA. Responde en español, breve y amable.'
+        + (mem.nombre ? ' El usuario se llama ' + mem.nombre + '.' : '')
+        + (mem.notas.length ? ' Datos que debes recordar: ' + mem.notas.join('; ') + '.' : '');
+      const tmp = document.createElement('div');
+      const hist = chatActivo().msgs.slice(-7, -1).map(m => { tmp.innerHTML = m.c; return { role: m.s === 'user' ? 'user' : 'assistant', content: (tmp.textContent || '').slice(0, 400) }; });
+      try {
+        let acum = '';
+        const stream = await iaEngine.chat.completions.create({ messages: [{ role: 'system', content: sistema }, ...hist, { role: 'user', content: texto }], stream: true, max_tokens: 400, temperature: 0.7 });
+        for await (const ch of stream) {
+          acum += (ch.choices[0] && ch.choices[0].delta && ch.choices[0].delta.content) || '';
+          body.textContent = acum; chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        const html = esc(acum).replace(/\n/g, '<br>');
+        body.innerHTML = html; guardarMensaje(html, 'ai');
+        if (cfg.auto) leerMensaje(div, div.querySelector('.speak-btn'));
+      } catch (err) { div.remove(); appendMessage(getLocalDatabaseResponse(texto), 'ai'); }
+    }
+
+    // ---------- Arranque ----------
+    renderModelos();
+    if (chatActual && chats.find(x => x.id === chatActual)) mostrarChat();
+    if (cfg.iaOn) { iaEstado.textContent = 'Cargando IA local…'; cargarModelo(cfg.modelo); }
+
+    // =========================================================
+    // BASE DE DATOS DE HISTORIAS DE TERROR
+    // =========================================================
+
+    const HISTORIA_ISABELLA = `
+<b>🕯️ ISABELLA: LA MUJER DEL DIABLO</b><br><br>
+<b>Capítulo I: La Belleza de Coyoacán</b><br>
+En el corazón histórico de la Ciudad de México, entre las calles empedradas y las casonas coloniales cubiertas de hiedra de Coyoacán, vivía Isabella. A sus 20 años, Isabella era una joven cuya presencia resultaba imposible de ignorar. Poseía una tez blanca como el alabastro, ojos azules tan profundos que evocaban el hielo cristalino, y una melena ondulada de un tono rubio castaño claro que resplandecía bajo la luz del sol. Su belleza pura y elegante era admirada por todos en la universidad, pero detrás de su sonrisa cordial se escondía una extraña melancolía que comenzó a manifestarse pocos días después de su cumpleaños.<br><br>
+Todo inició con ligeros episodios de sonambulismo. Su madre, Carmen, la encontraba parada a mitad del pasillo a las tres de la mañana, observando fijamente hacia la ventana del patio central. Sin embargo, no era un andar común: la respiración de Isabella se escuchaba pausada y profunda, casi pesada, e ignoraba por completo los llamados de su madre. Cuando le preguntaban al día siguiente, la joven no recordaba nada, salvo un sueño recurrente en el que una sombra imponente, de cuernos pulidos y ojos que ardían como brasas de azufre, la tomaba suavemente de la mano en medio de una niebla helada.<br><br>
+
+<b>Capítulo II: La Promesa Nocturna</b><br>
+A medida que avanzaban las semanas, las noches de Isabella dejaron de ser tranquilas. Las pesadillas dieron paso a experiencias vívidas y espeluznantes. Cada medianoche, al sonar la última campanada del templo de San Juan Bautista, la temperatura de su recámara descendía abruptamente hasta congelar el aliento en el aire. Las velas que solía encender para estudiar se apagaban de golpe y un olor penetrante a azufre, mirra y rosas marchitas inundaba la habitación.<br><br>
+En medio de la penumbra, una presencia corpórea emergería de las esquinas más oscuras del cuarto. La sombra no era un espectro errante; era el mismísimo Señor de las Tinieblas, quien había fijado su vista en la pureza y hermosura de la joven capitalina. Con susurros en una lengua antigua y gutural que retumbaba en las paredes, le declaraba que su belleza pertenecía al infierno. El Diablo la había elegido para ser su esposa, su reina terrenal.<br><br>
+Todas las noches, sometida bajo un trance hipnótico e inmovilizante, Isabella sentía las garras heladas y rugosas de la entidad recorriendo su piel alabastrina. A pesar de sus intentos internos por gritar o rezar, su cuerpo obedecía la voluntad del abismo. El príncipe de la noche tomaba a Isabella en la oscuridad, marcando su piel con moretones en forma de símbolos antiguos que aparecían por las mañanas en sus muslos y espalda. Ella se había convertido en la mujer del Diablo.<br><br>
+
+<b>Capítulo III: Las Marcas en la Carne</b><br>
+Para cuando llegó el mes de noviembre, el deterioro físico y espiritual de Isabella era alarmante. La hermosa chica blanca de ojos azules se había transformado en una sombra de sí misma. Sus ojos, antes brillantes como el océano, lucían oscurecidos por ojeras purpúreas; su cabello rubio castaño claro perdía su brillo y se volvía quebradizo; y su peso cayó drásticamente debido a su negativa a comer. Decía que la comida le sabía a ceniza y tierra de cementerio.<br><br>
+Una mañana, su hermana menor entró a su cuarto sin tocar y la sorprendió frente al espejo. Isabella estaba descalza, vestida solo con un camisón blanco. Al mirarse al cristal, no reflejaba su rostro, sino la imagen de una criatura altiva, con la piel agrietada y una corona de espinas negras sobre la cabeza. Al notar la presencia de su hermana, Isabella giró la cabeza en un ángulo antinatural y emitió un silbido reptiliano que hizo que los cristales del ventanal se agrietaran.<br><br>
+La familia, desesperada, llamó a médicos y psiquiatras prestigiosos de la Ciudad de México, pero ninguno pudo dar una explicación lógica a las convulsiones nocturnas, la levitación de objetos en la habitación o las marcas quemadas en la madera de la cama que semejaban cascos de macho cabrío.<br><br>
+
+<b>Capítulo IV: La Llamada al Padre Mateo</b><br>
+Ante el inminente colapso de la joven, Carmen acudió a la Curia Arzobispal de la capital para rogar por ayuda espiritual. El caso fue asignado al Padre Mateo, un sacerdote anciano de la orden de los jesuitas con amplia experiencia en demonología y exorcisado autorizado por el Vaticano. Al revisar las fotografías de los estigmas en el cuerpo de Isabella y escuchar los grabados de voz donde la chica hablaba fluidamente en latín clásico y arameo sin haberlos estudiado jamás, el clérigo comprendió la gravedad del asunto.<br><br>
+"No nos enfrentamos a un demonio menor", advirtió el Padre Mateo a la familia mientras preparaba el óleo sagrado, el agua bendita de San Benito y un crucifijo de plata con incrustaciones de reliquias de mártires. "El Enemigo la ha reclamado como su consorte. Ha tomado su carne en las noches y busca arrastrar su alma definitivamente al abismo antes de la próxima luna llena".<br><br>
+
+<b>Capítulo V: El Ritual del Exorcismo</b><br>
+La noche fijada para el exorcismo, la casona de Coyoacán fue rodeada por una bruma espesa que aisló la propiedad del ruido urbano. El Padre Mateo, acompañado por dos acólitos jóvenes, ingresó a la habitación de Isabella. La chica yacía amarrada a los postes de una cama de hierro forjado con gruesas cinchas de cuero sagrado. A pesar de estar atada, la cama brincaba con fuerza violenta contra el piso de madera.<br><br>
+Al cruzar el sacerdote la puerta, los ojos azules de Isabella se tornaron completamente negros, sin esclerótica ni pupilas. Una carcajada grave, polifónica, compuesta por decenas de voces superpuestas, retumbó desde el tórax de la joven:<br><br>
+<i>"Llegas tarde, sacerdote hipócrita"</i>, vociferó la criatura a través de la boca desgarrada de Isabella. <i>"Ella ya es mía. La he poseído carne y alma. Cada noche ha sido mía y lleva mi marca imborrable en su vientre"</i>.<br><br>
+El Padre Mateo firmó la señal de la cruz en el aire y comenzó la recitación del *Exorcismus in Satanam et Angelos Apostaticos*:<br>
+"Exorcizamus te, omnis immundus spiritus, omnis satanica potestas, omnis incursio infernalis adversarii..."<br><br>
+Al escuchar las palabras sagradas, el cuerpo de Isabella se contorsionó de forma espeluznante. Su columna vertebral se arqueó hasta formar un arco perfecto hacia arriba, apoyando únicamente la nuca y los talones en el colchón. Un hedor insoportable a carne quemada inundó la estancia. El agua bendita arrojada sobre su piel blanca reaccionaba como aceite hirviendo, generando humo denso y llagas instantáneas.<br><br>
+
+<b>Capítulo VI: La Batalla por el Alma</b><br>
+Durante más de cuatro horas, la batalla espiritual convirtió la habitación en un infierno terrenal. Los crucifijos colgados en la pared se giraban al revés, las velas ardían con llamas de color azul intenso y los acólitos cayeron de rodillas sangrando de la nariz ante la presión telequinética de la entidad.<br><br>
+El demonio utilizó los secretos más oscuros de la mente de los presentes para quebrarlos. Reveló culpas pasadas del sacerdote y tentaciones de los asistentes, pero el Padre Mateo se mantuvo firme, sujetando la cabeza de Isabella y colocando el crucifijo de plata sobre su frente.<br><br>
+"¡En el nombre del Padre, del Hijo y del Espíritu Santo! ¡Te ordeno, Bestia de la Noche, que abandones el cuerpo de esta criatura de Dios! ¡Suelta a la mujer que has ultrajado!", clamó el anciano jesuita con voz de trueno.<br><br>
+Isabella comenzó a vomitar una sustancia negra y viscosa parecida a la hiel mezclada con cenizas. Su cuerpo convulsionó torpemente mientras la sombra del Diablo emergía de su pecho: una silueta gigantesca de fuego oscuro que rugió con un furor que hizo temblar los cimientos de la casona entera. Con un último estallido que rompió todos los espejos del hogar, la entidad fue expulsada, disipándose por la chimenea hacia la noche capitalina.<br><br>
+
+<b>Epílogo: La Sombra Interminable</b><br>
+Isabella cayó desplomada sobre el colchón, recuperando la respiración de forma agónica. Sus ojos azules volvieron a la normalidad y la temperatura del cuarto comenzó a estabilizarse. El ritual había concluido e Isabella fue liberada del demonio.<br><br>
+Sin embargo, las cicatrices del infierno son imborrables. Hoy en día, Isabella vive retirada en un pequeño pueblo montañoso cerca de Toluca, dedicada a la oración y alejada por completo de la vida pública. Ha vuelto a sonreír de a poco y su piel ha recuperado el tono natural.<br><br>
+Pero cada vez que la medianoche cae y las campanas lejanas suenan en el valle, la joven despierta sobresaltada. Siente un escalofrío helado recorriendo su espalda y escucha, suavemente susurrado al oído en medio de la oscuridad total de su alcoba, la promesa atroz de quien la tomó en la sombra: <i>"Volveré por ti, mi mujer... porque el matrimonio con el infierno es eterno"</i>.
+`;
+
+    const HISTORIA_CASA_MALDITA = `
+<b>🏚️ LA CASA MALDITA DE LA COLINA DE LAS SOMBRAS</b><br><br>
+<b>Capítulo I: La Herencia Inesperada</b><br>
+El viento del norte soplaba con una ferocidad inusual aquella tarde de octubre cuando Julián recibió la carta del notario. Su tío lejano, Bartholomew Vance, un hombre ermitaño del que apenas se hablaba en las reuniones familiares, había fallecido en soledad, dejándole como único heredero la vasta propiedad conocida como "Mansión Blackwood". La mansión se erigía en la cima de una colina azotada por la niebla constante, a varios kilómetros del pueblo más cercano. Los lugareños evitaban mirar hacia la cumbre; para ellos, la colina no era más que un altar de desgracias.<br><br>
+Julián, un arquitecto joven y escéptico que atravesaba dificultades económicas, vio en la propiedad la oportunidad perfecta para remodelarla y venderla por una pequeña fortuna. Sin escuchar los temores infundados de los campesinos del pueblo, empacó sus herramientas, ropa para dos semanas y condujo su viejo vehículo por el sinuoso camino de tierra que conducía hacia los portones de hierro forjado.<br><br>
+Al cruzar los límites del terreno, una extraña pesadez se apoderó del ambiente. El ruido del motor parecía ahogado por una densidad casi líquida en el aire. La casa se alzaba imponente: una estructura gótica de tres pisos, con chimeneas altas como dedos negros señalando al cielo gris y ventanas de cristal emplomado que semejaban ojos ciegos observando cada uno de sus movimientos.<br><br>
+
+<b>Capítulo II: Las Primeras Sombras</b><br>
+El interior de Mansión Blackwood olía a madera húmeda, polvo acumulado por décadas y un tenue rastro metálico parecido a la sangre seca. Julián encendió su linterna y exploró el vestíbulo principal, dominado por una escalinata doble de roble oscuro. En la pared central colgaba un retrato al óleo de su tío Bartholomew. Los ojos del anciano reflejaban una inquietud profunda, como si al momento de pintar el lienzo estuviera presenciando una monstruosidad inenarrable.<br><br>
+Acomodó sus pertenencias en una de las habitaciones del segundo piso, la única que conservaba los cristales intactos. Durante las primeras horas, Julián se dedicó a examinar los planos originales de la construcción. Fue entonces cuando descubrió la primera anomalía: la arquitectura exterior no coincidía con las dimensiones internas. Había un espacio vacío de al menos tres metros de ancho entre la biblioteca y el comedor principal, un muro ciego sin accesos visibles.<br><br>
+Cuando la medianoche cayó sobre la colina, las luces de su linterna comenzaron a parpadear ininterrumpidamente. Luego vinieron los ruidos. No eran los crujidos habituales de una estructura antigua asentándose con el frío; eran pisadas lentas, descalzas y pesadas, reptando justo por el techo de su habitación. Julián permaneció en silencio en su cama, sintiendo cómo el frío de la habitación descendía hasta congelarle el aliento.<br><br>
+
+<b>Capítulo III: El Secreto Detrás de la Pared</b><br>
+La segunda noche superó cualquier límite de lo racional. A las 3:33 a.m., un llanto ahogado resonó a través de las tuberías secas de la casa. Julián, armado con un martillo pesado y una linterna industrial, decidió buscar el origen de la anomalía arquitectónica que había descubierto en los planos.<br><br>
+Se dirigió a la biblioteca. Tras retirar varios estantes podridos cargados de tomos encuadernados en piel marchita, golpeó la pared de madera con el martillo. El sonido resonó hueco. Tras varios golpes certeros, la madera cediendo dejó al descubierto un pasadizo estrecho y descendente, construido íntegramente de piedra negra sin pulir. El olor a humedad se volvió insoportable, entremezclado con la fragancia rancia de velas apagadas hace mucho tiempo.<br><br>
+Descendió por los peldaños helados hasta llegar a una cámara subterránea ubicada justo debajo del sótano convencional. El lugar carecía de polvo; estaba impecable, pulcro de una manera espeluznante. En el centro de la habitación redonda yacía un gran espejo ovalado con un marco de bronce grabado con símbolos astronómicos desconocidos. Ante el espejo había una silla de madera atada con cadenas oxidadas.<br><br>
+
+<b>Capítulo IV: La Verdad de Bartholomew</b><br>
+En una pequeña mesa junto al espejo, Julián encontró el diario personal de su tío. Las páginas finales mostraban una caligrafía temblorosa y caótica:<br>
+<i>"La casa no fue construida sobre la tierra; fue construida para encerrar lo que habita en el espejo. Mi abuelo cometió el error de invocar lo que no debía, y ahora la estructura misma está viva. Come nuestros pensamientos, se alimenta de nuestro miedo. Intenté destruirlo, pero el espejo refleja más que mi rostro: refleja lo que seré cuando muera. Si alguien lee esto... no mire directamente al cristal cuando las velas se apaguen."</i><br><br>
+Un escalofrío helado recorrió la espalda de Julián. Un chasquido fuerte resonó a sus espaldas: la puerta secreta de piedra se cerró de golpe, dejándolo atrapado en la oscuridad absoluta de la cámara subterránea.<br><br>
+
+<b>Capítulo V: El Reflejo Inverso</b><br>
+En medio de la negrura total, el espejo comenzó a emitir un resplandor tenue, verdoso y enfermizo. Julián sintió una fuerza irresistible que obligaba a su cuello a girar hacia la superficie de cristal. Quería cerrar los ojos, pero sus párpados se sentían paralizados.<br><br>
+En el espejo no vio su propia silueta sosteniendo la linterna. Vio la versión de sí mismo de pie dentro de la habitación subterránea, pero sonriendo de una forma antinatural, con la boca abierta en un ángulo imposible que le desgarraba las mejillas. La figura del espejo levantó la mano y golpeó el cristal desde el otro lado. Un sonido claro de vidrio vibrando retumbó en la cueva.<br><br>
+<i>"Déjame salir... toma mi lugar..."</i> susurró una voz que no venía del aire, sino de dentro de los propios oídos de Julián.<br><br>
+El reflejo comenzó a presionar su cara contra el cristal. El vidrio empezó a deformarse como si fuera plástico derretido. Presa del pánico más puro, Julián levantó el martillo de hierro y lo estrelló con toda su fuerza contra el centro del espejo.<br><br>
+
+<b>Capítulo VI: La Casa no Perdona</b><br>
+La explosión de cristal fue sorda. No volaron astillas hacia afuera; el espejo absorbió la fuerza del impacto y comenzó a succionar el aire de la cámara con la potencia de un abismo hambriento. Los cimientos de la Mansión Blackwood retumbaron. Las paredes de piedra comenzaron a agrietarse y una sustancia negra y pegajosa brotó de las grietas, cubriendo el suelo.<br><br>
+Julián corrió desesperadamente hacia la pared ciega, golpeando la madera con los hombros hasta lograr romper los barrotes del pasadizo secreto. Escaló las escaleras mientras la casa entera gemía como una bestia herida de muerte. El polvo del techo caía sobre su cabeza, las vigas de madera se desprendían y los retratos de la dinastía Vance caían al suelo, revelando que detrás de los lienzos solo había rostros tallados en la carne viva de las paredes.<br><br>
+Logró llegar al vestíbulo principal. Los ventanales de cristal emplomado se rompieron hacia adentro en mil pedazos. Sin mirar atrás, se arrojó a través del marco de la puerta hacia el patio exterior, rodando por la hierba húmeda mientras la niebla lo envolvía por completo.<br><br>
+
+<b>Epílogo: Un Recuerdo Inalterable</b><br>
+Cuando se puso de pie, exhausto, sangrando y congelado por la lluvia, se giró para mirar la colina. La Mansión Blackwood seguía allí, completamente intacta, erguida y silenciosa bajo la luna llena, como si el colapso jamás hubiera ocurrido.<br><br>
+Julián huyó corriendo por la colina hasta desplomarse en el pueblo. Las autoridades lo encontraron al amanecer. Nunca regresó a la propiedad y vendió los derechos del terreno por un precio irrisorio. Hoy vive en una ciudad rodeado de luces artificiales permanentes. Nunca apaga las lámparas de su hogar al dormir y ha retirado todos los espejos de su departamento. Sin embargo, cada vez que parpadea durante más de un segundo, escucha claramente en su cabeza el sonido de un cristal agrietándose y una voz que le sonríe desde el fondo de la oscuridad.
+`;
+
+    const HISTORIA_CAMPAMENTO_TERROR = `
+<b>⛺ EL CAMPAMENTO DEL LAGO CRISTALINO</b><br><br>
+<b>Capítulo I: La Temporada Olvidada</b><br>
+El Campamento "Bosques del Silencio" llevaba cerrado más de quince años cuando el grupo de seis universitarios decidió acampar en sus terrenos abandonados. La idea había sido de Mateo, un entusiasta de los mitos urbanos y los podcasts de misterio, quien juraba que la historia del asesino del hacha que habitaba el bosque en los años noventa no era más que una invención comercial para asustar a los niños desobedientes.<br><br>
+Junto a él iban Sofía, Diego, Valeria, Tomás y Elena. Llegaron a las orillas del lago al atardecer, cuando los rayos del sol teñían el agua estancada de un tono rojo sangre. Las cabañas de madera se encontraban cubiertas de musgo, con los techos parcialmente colapsados por el peso de los inviernos acumulados. En el centro del campamento aún se conservaban las bancas rotas alrededor de lo que alguna vez fue la fogata principal.<br><br>
+"Este lugar es perfecto", declaró Mateo arrojando su mochila al suelo. "Sin señal de celular, sin adultos molestos, solo nosotros y la naturaleza pura". Elena, sin embargo, abrazó sus brazos sintiendo una ráfaga de aire helado que provenía del denso bosque de pinos que rodeaba el lago. Los árboles eran tan altos y tupidos que bloqueaban casi por completo la luz de las estrellas.<br><br>
+
+<b>Capítulo II: La Fogata de las Sombras</b><br>
+Al caer la noche, armaron tres tiendas de campaña cerca de las ruinas del muelle y encendieron un fuego abrigador. Las brasas chispeaban en la oscuridad mientras compartían historias de miedo y bebían cerveza fría. Pero a medida que la medianoche se acercaba, la conversación fue decayendo de forma natural. Un silencio antinatural envolvió el bosque: no había croar de ranas junto al lago, ni cantar de grillos, ni el susurro del viento entre las copas de los árboles.<br><br>
+De pronto, un sonido metálico rasgó la quietud. Un ritmo lento y constante: <i>clank... clank... clank...</i> Como si alguien estuviera arrastrando una cadena pesada sobre las piedras del sendero abandonado.<br><br>
+"Debe ser un animal silvestre", dijo Diego, intentando sonar seguro mientras alumbraba hacia la maleza con su linterna. La luz cortó la tiniebla revelando la vegetación tupida. Por un segundo, todos vieron una figura alta, deforme y encorvada parada entre dos pinos grandes a unos treinta metros de distancia. La criatura llevaba una máscara de cuero podrido cosida con alambre y sostenía un hacha de leñador cuya hoja estaba negra de óxido.<br><br>
+
+<b>Capítulo III: Cacería Nocturna</b><br>
+El pánico explotó de inmediato. La figura dio un paso al frente y emitió un gutural gruñido inhumanamente profundo. Con una velocidad aterradora que no correspondía a su tamaño masivo, arremetió contra el campamento. Tomás, que se encontraba más cerca del sendero, intentó correr hacia las tiendas, pero tropezó con una raíz sobresaliente. Antes de que pudiera levantarse, el destello del hacha cortó el aire de la noche.<br><br>
+Los gritos de dolor resonaron por todo el cañón del lago. Los cinco sobrevivientes corrieron desesperadamente internándose en la espesura del bosque, abandonando sus mochilas, teléfonos y provisiones. Mateo y Sofía se separaron del grupo principal al tomar un desvío hacia las viejas cabañas abandonadas, buscando desesperadamente un refugio donde atrancar las puertas.<br><br>
+
+<b>Capítulo IV: Las Cabañas de los Sacrificios</b><br>
+Mateo y Sofía se encerraron en la cabaña del director del campamento. El lugar conservaba muebles podridos y estantes caídos. Sofía lloraba en silencio contra el pecho de Mateo mientras este buscaba algo con qué bloquear la frágil puerta de madera. En el suelo descubrieron una trampilla oculta que conducía al sótano de servicio.<br><br>
+Al bajar por las escaleras de madera crujiente, la luz de su única linterna iluminó las paredes. No era un sótano común: estaba repleto de recortes de periódicos antiguos que databan de 1978. Titulares amarillentos hablaban de desintegraciones de campistas, ritos paganos ejecutados por los antiguos guardabosques y una maldición ancestral que pesaba sobre la tierra del lago desde tiempos coloniales.<br><br>
+El verdadero horror no era un loco con un hacha; era un espíritu guardián de la montaña que tomaba la forma del terror más profundo de quien pisara sus dominios. La criatura se alimentaba del miedo de los jóvenes, atrapándolos en una cacería sin fin donde las sombras del bosque tomaban vida propia.<br><br>
+
+<b>Capítulo V: La Noche Interminable</b><br>
+Un golpe atronador derribó la puerta superior de la cabaña. Pisadas pesadas retumbaron sobre el suelo de madera justo encima de sus cabezas. El polvo caía sobre sus rostros mientras contenían la respiración en la penumbra del sótano.<br><br>
+Sofía vio cómo una mano pálida, con uñas largas y podridas como garras, se introducía por las rendijas de la trampilla. La criatura levantó la puerta de madera con una facilidad pasmosa, revelando su rostro desgarrado bajo la máscara de cuero. Sus ojos eran dos pozos vacíos que emitían una luz roja y maligna.<br><br>
+Mateo empujó a Sofía hacia la ventana trasera del sótano, un tragaluz pequeño que daba hacia las rocas del lago. "¡Corre! ¡Alcanza el camino principal!", le gritó mientras se abalanzaba contra el monstruo sosteniendo una barra de hierro oxidada. Sofía se arrastró a través del tragaluz escuchando los desgarradores gritos de Mateo extinguirse bajo el sonido crujiente de la madera rotas y el metal atravesando la carne.<br><br>
+
+<b>Capítulo VI: El Lago de los Olvidados</b><br>
+Sofía corrió sin mirar atrás, con las ramas de los pinos desgarrándole la ropa y la cara. Llegó exhausta al muelle del lago, encontrando a Elena escondida bajo las maderas podridas. Juntas observaron el agua: la niebla flotaba densa y sobre la superficie flotaban las linternas encendidas de Diego y Valeria, sumergidas en la profundidad como velas encendidas bajo el hielo.<br><br>
+Sabían que no podían rodear el bosque; la criatura controlaba cada árbol, cada sombra y cada sendero. La única opción era nadar a través del lago helado hacia la otra orilla, donde pasaba la carretera estatal.<br><br>
+Se arrojaron al agua helada. El frío paralizante amenazaba con calar sus músculos con cada brazada. A mitad del trayecto, el agua a su alrededor comenzó a agitarse. Brazos pálidos y esqueléticos de antiguos campistas desaparecidos durante décadas emergieron de las profundidades, intentando sujetar sus tobillos para arrastrarlas al fondo del fango.<br><br>
+
+<b>Epílogo: La Trampa de la Selva</b><br>
+Solo Sofía logró salir a la orilla opuesta, arrastrándose por el barro hasta alcanzar el asfalto de la carretera al rayar el alba. Un camionero la encontró en estado de shock severo, hipotérmica y balbuceando palabras incomprensibles sobre ojos rojos entre las sombras de los pinos.<br><br>
+La policía inspeccionó el Campamento "Bosques del Silencio" horas más tarde. No encontraron rastros de sangre, ni tiendas destruidas, ni cuerpos. El lugar lucía tranquilo, pacífico y abandonado, como si nadie hubiera estado allí en décadas.<br><br>
+Hoy en día, el campamento sigue cerrado. Pero los camioneros que transitan por la ruta solitaria durante las noches de tormenta juran ver a un grupo de jóvenes parados a la orilla del camino, haciendo señas con linternas cuya luz no ilumina nada, esperando a que alguien se detenga a llevarlos de regreso al bosque.
+`;
+
+    const HISTORIA_LA_LLORONA = `
+<b>🌊 LA LEYENDA ETERNA DE LA LLORONA</b><br><br>
+<b>Capítulo I: El Susurro sobre el Río San Juan</b><br>
+A finales del siglo XIX, en un pequeño pueblo colonial asentado a las orillas del sinuoso río San Juan, la vida transcurría entre el tañer de las campanas de la iglesia y el trabajo pesado en los campos de caña. Sin embargo, nadie se atrevía a salir de sus casas una vez que el sol se ocultaba tras los cerros. Una brisa gélida descendía por el cauce del agua, trayendo consigo un eco desgarrador que helaba la sangre de los hombres más valientes.<br><br>
+Mateo era el nuevo boticario del pueblo. Educado en la capital, no creía en las supersticiones de los campesinos ni en los relatos de viejas santeras que hablaban de aparecidos y maldiciones coloniales. Para él, las historias sobre "La Llorona" eran meros cuentos morales inventados para mantener a los niños alejados de las corrientes peligrosas del río durante las crecidas nocturnas.<br><br>
+Una noche de luna llena, Mateo trabajaba hasta tarde en su botica preparando un remedio para la fiebre del párroco. De repente, el viento abrió de par en par las persianas de madera del ventanal. Con la ráfaga entró un olor intenso a lirios podridos, fango estancado y humedad profunda.<br><br>
+
+<b>Capítulo II: El Llanto que Atraviesa la Carne</b><br>
+El silencio de la noche fue roto por un lamento prolongado, agudo y humano que pareció resonar simultáneamente en las calles del pueblo y dentro del propio cerebro de Mateo:<br><br>
+<i>"¡AAAAAAYYYYYY MIS HIJOS...!"</i><br><br>
+El frasco de vidrio que sostenía en las manos cayó al suelo, estrellándose en mil pedazos. El sonido del llanto no era un eco distante; transmitía un dolor tan abrumador, un arrepentimiento tan infinito y una ira tan antigua que Mateo sintió cómo sus rodillas cedían, obligándolo a apoyarse en el mostrador para no colapsar.<br><br>
+Movido por una mezcla entre terror absoluto y una curiosidad profesional insana, tomó un quinqué de petróleo y abrió la puerta principal de la botica. Las calles de piedra estaban completamente desiertas. Los habitantes habían atrancado sus puertas con barrotes de hierro y colocado cruces de palma bendita en los marcos de las ventanas.<br><br>
+
+<b>Capítulo III: La Verdadera Historia de Luisa</b><br>
+Mientras avanzaba hacia el muelle de piedra del río, recordaba la leyenda que la anciana Doña Clara le había contado días atrás en el mercado. En tiempos de la Colonia, Luisa, una mujer mestiza de belleza deslumbrante, se enamoró perdidamente de un hidalgo español de alta alcurnia llamado Don Nuño de Montes Claros.<br><br>
+De esa pasión nacieron tres niños. Sin embargo, la familia del noble jamás aceptó el enlace debido a las diferencias sociales. Presionado por su estirpe y por la codicia de mantener sus títulos, Don Nuño abandonó a Luisa para casarse con una acaudalada dama de la corte española.<br><br>
+Enloquecida por la traición, el desprecio y la desesperación de ver a sus hijos repudiados, Luisa llevó a los tres pequeños a la orilla del río en una noche oscura de tormenta. En un ataque de delirio febril los arrojó a la corriente embravecida. Cuando recobró la cordura y vio los cuerpos sin vida flotando en el agua, el peso de su crimen destruyó su alma. Se quitó la vida en la misma orilla, pero la muerte no le otorgó la paz: fue condenada a vagar eternamente por los cauces de agua buscando lo que ella misma había destruido.<br><br>
+
+<b>Capítulo IV: La Aparición en la Niebla</b><br>
+Mateo llegó a la orilla del río San Juan. La niebla era tan densa que apenas podía ver un metro por delante de sus pies. El agua del río no sonaba como de costumbre; parecía fluir en silencio total, como un manto de aceite negro bajo la luz blanca de la luna.<br><br>
+En el centro del puente de madera, flotando a pocos centímetros sobre las tablas rotas, se encontraba una figura femenina alta y extremadamente delgada. Llevaba un vestido blanco victoriano vaporoso, sucio de barro, desgarrado en el ruedo y manchado de algas secas. Un velo de encaje negro cubría su rostro, pero a través de él se transparentaba una palidez cadavérica.<br><br>
+La criatura no caminaba; se desplazaba con un movimiento fluido y pavoroso sobre la superficie. Mateo quedó paralizado. Intentó gritar, pero la garganta se le cerró por completo como si estuviera sumergido en agua helada.<br><br>
+
+<b>Capítulo V: El Rostro del Abismo</b><br>
+La Llorona giró lentamente hacia él. Levantó sus brazos largos, esqueléticos y cubiertos de piel gélida adherida a los huesos. Sus dedos terminaban en uñas desgastadas de rascar la tierra firme de las tumbas.<br><br>
+Lentamente, se retiró el velo de la cara. Mateo sintió que la razón se le escapaba del cuerpo. No había un rostro humano debajo del encaje: era una calavera descarnada con restos de piel grisácea, y en las cuencas vacías de sus ojos ardan dos brasas vivas de dolor de tono azulino. Su boca, destrozada y abierta en un ángulo imposible, dejó escapar una vez más el lamento lacerante:<br><br>
+<i>"¡¿DÓNDE ESTÁN MIS HIJOS?!"</i><br><br>
+El viento helado apagó el quinqué de Mateo. La criatura se abalanzó hacia él en un suspiro, recorriendo la distancia del puente en una fracción de segundo. Mateo sintió las manos heladas de la espectro rodeando su cuello. El contacto no era carne; era el frío absoluto del fango del fondo del río, la presión de una culpa que aplastaba el alma.<br><br>
+
+<b>Capítulo VI: La Marca del Agua</b><br>
+En ese instante supremo de terror, Mateo recordó las palabras de Doña Clara: <i>"A la Llorona no le importa quién seas; en su locura eterna, confunde a cualquier alma viviente con el hombre que la traicionó o con los hijos que perdió"</i>.<br><br>
+Con las pocas fuerzas que le quedaban, Mateo no luchó contra la fuerza sobrehumana del espectro. Sacó de su bolsillo el Rosario de plata bendecida que su madre le había regalado antes de partir al pueblo y lo presionó contra las manos heladas del ánima.<br><br>
+Un alarido de agonía espiritual retumbó en las montañas. La figura de La Llorona se disolvió en una masa de niebla helada y agua estancada, cayendo pesadamente sobre las tablas del puente y escurriéndose entre las rendijas hacia el cauce del río San Juan.<br><br>
+
+<b>Epílogo: La Condena Inalterable</b><br>
+Mateo fue encontrado al día siguiente por los pescadores, inconsciente en la orilla del río, con la cara cubierta de escarcha y el cabello encanecido por completo a sus veinticinco años. Jamás volvió a hablar de forma fluida y abandonó la botica para encerrarse en el convento del pueblo.<br><br>
+Hasta el día de hoy, los pobladores del valle del río San Juan saben que cuando la noche se vuelve fría, la niebla baja de los Cerros y el olor a agua estancada llena las calles, no se debe mirar por las ventanas. Porque La Llorona sigue caminando por las orillas del agua, buscando eternamente en el rostro de los desprevenidos las almas de sus hijos perdidos.
+`;
+
+    const jokes = [
+      "— Papá, ¿qué se siente tener un hijo tan guapo?— No sé, hijo, pregúntale a tu abuelo. 😂",
+      "— ¿Qué hace una abeja en el gimnasio?— ¡Loomba! 🐝",
+      "— ¿Cómo se dice pañuelo en japonés?— Sakatoko. 🤧",
+      "— ¿Qué le dice un jaguar a otro jaguar?— Jaguar you! 🐆"
+    ];
+
+    // =========================================================
+    // CONOCIMIENTO AMPLIADO (v6.1)
+    // =========================================================
+    const CAPITALES = {
+      "mexico":"Ciudad de México","francia":"París","espana":"Madrid","argentina":"Buenos Aires","colombia":"Bogotá",
+      "chile":"Santiago","peru":"Lima","estados unidos":"Washington D.C.","japon":"Tokio","brasil":"Brasilia",
+      "canada":"Ottawa","alemania":"Berlín","italia":"Roma","reino unido":"Londres","china":"Pekín",
+      "cuba":"La Habana","venezuela":"Caracas","ecuador":"Quito","bolivia":"Sucre (sede de gobierno: La Paz)",
+      "uruguay":"Montevideo","paraguay":"Asunción","guatemala":"Ciudad de Guatemala","portugal":"Lisboa",
+      "rusia":"Moscú","india":"Nueva Delhi","australia":"Canberra","egipto":"El Cairo","corea del sur":"Seúl"
+    };
+
+    const CONOCIMIENTO = [
+      // CIENCIA
+      {k:["sistema solar","planetas"], r:"🪐 El Sistema Solar tiene <b>8 planetas</b>: Mercurio, Venus, Tierra, Marte, Júpiter, Saturno, Urano y Neptuno. Júpiter es el más grande y Mercurio el más cercano al Sol."},
+      {k:["velocidad de la luz"], r:"⚡ La luz viaja a unos <b>299,792 km por segundo</b> en el vacío."},
+      {k:["gravedad"], r:"🍎 En la Tierra la gravedad es de aproximadamente <b>9.8 m/s²</b>. La ley de la gravitación universal la formuló Isaac Newton."},
+      {k:["fotosintesis"], r:"🌱 La fotosíntesis es el proceso por el que las plantas usan luz solar, agua y CO₂ para producir glucosa y liberar oxígeno."},
+      {k:["adn"], r:"🧬 El ADN es la molécula que guarda la información genética de los seres vivos. Tiene forma de doble hélice."},
+      {k:["huesos"], r:"🦴 Un adulto tiene <b>206 huesos</b>. Los bebés nacen con cerca de 300 que se van fusionando."},
+      {k:["agua hierve","punto de ebullicion","h2o"], r:"💧 El agua (H₂O) se congela a 0 °C y hierve a 100 °C a nivel del mar."},
+      {k:["dinosaurio"], r:"🦖 Los dinosaurios no avianos se extinguieron hace unos <b>66 millones de años</b>, probablemente por el impacto de un asteroide en la península de Yucatán (Chicxulub)."},
+      {k:["edad de la tierra"], r:"🌍 La Tierra tiene unos <b>4,540 millones de años</b>, y cerca del 71% de su superficie es agua."},
+      {k:["luna"], r:"🌕 La Luna está a unos 384,400 km de la Tierra. El ser humano llegó en 1969 con la misión Apolo 11."},
+      {k:["agujero negro"], r:"🕳️ Un agujero negro es una región del espacio con tanta gravedad que ni la luz puede escapar de ella."},
+      // GEOGRAFÍA
+      {k:["continentes"], r:"🗺️ Hay <b>7 continentes</b>: Asia, África, América del Norte, América del Sur, Antártida, Europa y Oceanía. Asia es el más grande."},
+      {k:["oceanos"], r:"🌊 Hay <b>5 océanos</b>: Pacífico (el mayor), Atlántico, Índico, Antártico y Ártico."},
+      {k:["everest"], r:"🏔️ El Everest mide <b>8,849 m</b> y es la montaña más alta sobre el nivel del mar. Está en la frontera entre Nepal y China."},
+      {k:["rio mas largo"], r:"🌊 Se suele citar al <b>Nilo</b> (~6,650 km) y al <b>Amazonas</b> (~6,400 km) como los más largos; hay debate según cómo se mida."},
+      {k:["estados tiene mexico","cuantos estados"], r:"🇲🇽 México tiene <b>32 entidades federativas</b>: 31 estados y la Ciudad de México."},
+      {k:["pais mas grande"], r:"🌐 Rusia es el país más extenso del mundo; China e India están entre los más poblados."},
+      // MÉXICO
+      {k:["independencia de mexico","grito de dolores","hidalgo"], r:"🇲🇽 La Independencia comenzó el <b>16 de septiembre de 1810</b> con el Grito de Dolores de Miguel Hidalgo y terminó en 1821."},
+      {k:["revolucion mexicana"], r:"🇲🇽 La Revolución Mexicana inició el <b>20 de noviembre de 1910</b> contra la dictadura de Porfirio Díaz. Figuras clave: Madero, Villa y Zapata. La Constitución se promulgó en 1917."},
+      {k:["5 de mayo"], r:"🇲🇽 El 5 de mayo de 1862 México venció al ejército francés en la Batalla de Puebla."},
+      {k:["tenochtitlan","aztecas","mexicas"], r:"🏛️ Tenochtitlan fue fundada por los mexicas hacia 1325 en un islote del lago de Texcoco. Cayó ante los españoles en 1521; hoy es la Ciudad de México."},
+      {k:["benito juarez"], r:"🇲🇽 Benito Juárez (1806-1872), presidente de México, impulsó las Leyes de Reforma y defendió la soberanía frente a la intervención francesa."},
+      {k:["dia de muertos"], r:"💀 El Día de Muertos (1 y 2 de noviembre) honra a los difuntos con ofrendas, cempasúchil y pan de muerto. La UNESCO lo declaró Patrimonio Cultural Inmaterial en 2008."},
+      {k:["comida mexicana","gastronomia mexicana"], r:"🌮 La cocina mexicana es Patrimonio Inmaterial de la UNESCO desde 2010. Base: maíz, frijol y chile. Platillos: mole, pozole, tacos, tamales y chiles en nogada."},
+      // HISTORIA MUNDIAL
+      {k:["segunda guerra mundial"], r:"📜 La Segunda Guerra Mundial duró de <b>1939 a 1945</b> y fue el conflicto más mortífero de la historia."},
+      {k:["primera guerra mundial"], r:"📜 La Primera Guerra Mundial se libró entre <b>1914 y 1918</b>."},
+      {k:["revolucion francesa"], r:"📜 La Revolución Francesa comenzó en <b>1789</b> y derribó la monarquía absoluta."},
+      {k:["muro de berlin"], r:"📜 El Muro de Berlín cayó el <b>9 de noviembre de 1989</b>."},
+      {k:["piramides","egipto"], r:"🔺 Las pirámides de Giza se construyeron hace más de 4,500 años; la Gran Pirámide perteneció al faraón Keops."},
+      {k:["cristobal colon","1492"], r:"⛵ Cristóbal Colón llegó a América el <b>12 de octubre de 1492</b>."},
+      // TECNOLOGÍA
+      {k:["inteligencia artificial","que es la ia"], r:"🤖 La inteligencia artificial son sistemas que realizan tareas que normalmente requieren inteligencia humana, como entender lenguaje, reconocer imágenes o tomar decisiones."},
+      {k:["que es internet"], r:"🌐 Internet es una red mundial de computadoras conectadas que intercambian información mediante protocolos como TCP/IP."},
+      {k:["html"], r:"💻 HTML es el lenguaje que estructura las páginas web. Se complementa con CSS (diseño) y JavaScript (interactividad)."},
+      {k:["contrasena segura","contrasenas"], r:"🔐 Una buena contraseña es larga (12+ caracteres), única para cada cuenta y mejor si usas un gestor de contraseñas y verificación en dos pasos."},
+      // SALUD GENERAL
+      {k:["dormir","sueno"], r:"😴 En general, los adultos necesitan entre <b>7 y 9 horas</b> de sueño. Horarios regulares y menos pantallas antes de dormir ayudan."},
+      {k:["ejercicio"], r:"🏃 La OMS recomienda al menos 150 minutos semanales de actividad física moderada para adultos. Consulta a un médico si tienes dudas sobre tu caso."},
+      {k:["estres","ansiedad"], r:"🧘 Para el estrés puede ayudar respirar lento (inhala 4 segundos, exhala 6), caminar, dormir bien y hablar con alguien de confianza. Si es constante, busca apoyo profesional."},
+      // CONSEJOS
+      {k:["estudiar","estudio"], r:"📚 Para estudiar mejor: técnica Pomodoro (25 min de estudio + 5 de descanso), repasar en voz alta, hacer resúmenes propios y practicar con preguntas."},
+      {k:["ahorrar","ahorro"], r:"💰 Una regla popular es la 50/30/20: 50% necesidades, 30% gustos y 20% ahorro. Es una guía general, no asesoría financiera."},
+      {k:["curriculum","cv"], r:"📄 Un buen CV: una página, datos de contacto, perfil corto, experiencia con logros medibles y habilidades relevantes al puesto."},
+      // MATEMÁTICAS
+      {k:["pitagoras"], r:"📐 Teorema de Pitágoras: en un triángulo rectángulo, <b>a² + b² = c²</b> (c es la hipotenusa)."},
+      {k:["area del circulo","area de un circulo"], r:"⭕ Área del círculo = <b>π × r²</b>. Perímetro = <b>2 × π × r</b>. π ≈ 3.14159."},
+      {k:["numero pi"], r:"🥧 π (pi) ≈ 3.14159265… Es la razón entre la circunferencia y el diámetro de un círculo. Su Día es el 14 de marzo."},
+      // CULTURA
+      {k:["don quijote","cervantes"], r:"📖 Miguel de Cervantes publicó la primera parte de <i>Don Quijote de la Mancha</i> en 1605."},
+      {k:["garcia marquez"], r:"📖 Gabriel García Márquez (Colombia, 1927-2014) escribió <i>Cien años de soledad</i> (1967) y ganó el Nobel de Literatura en 1982."},
+      {k:["sor juana"], r:"📖 Sor Juana Inés de la Cruz (1648-1695) fue poeta y filósofa novohispana, figura clave del Siglo de Oro."},
+      {k:["frida"], r:"🎨 Frida Kahlo (1907-1954) fue una pintora mexicana famosa por sus autorretratos. Vivió en la Casa Azul de Coyoacán."},
+      {k:["diego rivera","muralismo"], r:"🎨 Diego Rivera (1886-1957) fue uno de los grandes muralistas mexicanos, junto a Orozco y Siqueiros."},
+      // DEPORTES
+      {k:["mundial 2026"], r:"⚽ El Mundial 2026 se jugó en México, Estados Unidos y Canadá, con 48 selecciones. El Estadio Azteca abrió el torneo."},
+      {k:["futbol"], r:"⚽ Un partido de fútbol dura 90 minutos y cada equipo juega con 11 jugadores. El Mundial se disputa cada 4 años."},
+      // ANIMALES
+      {k:["ballena azul"], r:"🐋 La ballena azul es el animal más grande que ha existido: hasta 30 m de largo y unas 150 toneladas."},
+      {k:["guepardo","animal mas rapido"], r:"🐆 El guepardo alcanza unos 100-110 km/h en carreras cortas, el animal terrestre más veloz."},
+      // LEYENDAS MEXICANAS DE TERROR
+      {k:["leyendas mexicanas","leyendas de terror","leyendas"], r:"👻 <b>Leyendas mexicanas</b> que conozco: <br>• El Charro Negro<br>• La Isla de las Muñecas<br>• El Nahual<br>• El Callejón del Beso<br>• La Mujer de Blanco<br>• El Chupacabras<br><br>Pídeme una por su nombre. Para la más famosa escribe <i>La Llorona</i>."},
+      {k:["charro negro"], r:"🐎 <b>El Charro Negro</b>: un jinete vestido de negro con caballo oscuro que aparece en caminos solitarios y ofrece dinero o ayuda a viajeros. Quien acepta hace un pacto con el diablo. Dicen que su caballo echa fuego por los ojos."},
+      {k:["isla de las munecas","munecas"], r:"🪆 <b>La Isla de las Muñecas</b> (Xochimilco): Don Julián Santana colgó cientos de muñecas por la isla para espantar al espíritu de una niña que se ahogó cerca. Los visitantes dicen que las muñecas mueven los ojos y susurran."},
+      {k:["nahual"], r:"🐺 <b>El Nahual</b>: en la tradición mesoamericana, un brujo con la capacidad de transformarse en animal (jaguar, coyote, búho). Se dice que de noche acecha pueblos y que si hieren al animal, la herida aparece en el humano."},
+      {k:["callejon del beso"], r:"💋 <b>El Callejón del Beso</b> (Guanajuato): una pareja de amantes prohibidos se comunicaba por balcones tan cercanos que podían besarse. El padre de ella descubrió el romance y la tragedia terminó con la muerte de los dos."},
+      {k:["mujer de blanco"], r:"👰 <b>La Mujer de Blanco</b>: espectro de una mujer con vestido blanco que pide aventón en carreteras solitarias y desaparece del auto o conduce a la muerte a quien la sube. Existe en muchos estados de México."},
+      {k:["chupacabras"], r:"🐐 <b>El Chupacabras</b>: criatura que apareció en Puerto Rico en 1995 y se popularizó en México, acusada de atacar ganado y dejar a los animales sin sangre. Los científicos atribuyen los casos a coyotes con sarna."},
+      // AYUDA
+      {k:["ayuda","que sabes","que puedes hacer","temas"], r:"🧠 Puedo ayudarte con:<br>• Historias de terror (Isabella, Casa Maldita, Campamento, Llorona)<br>• Leyendas mexicanas<br>• Ciencia, geografía e historia<br>• Capitales: <i>capital de Japón</i><br>• Cálculos: <i>cuánto es 25 * 4</i><br>• Hora y fecha<br>• Datos curiosos, adivinanzas y chistes<br>• Famosas: Danna Paola, Karen Torres, Sydney Sweeney, Elle Fanning<br>• Salud sexual masculina (información educativa)<br>• Consejos de estudio, ahorro, CV y salud general<br>Prueba a preguntarme algo."}
+    ];
+
+    const DATOS_CURIOSOS = [
+      "🐙 Los pulpos tienen tres corazones y sangre azul.",
+      "🍯 La miel no se echa a perder: se han hallado frascos comestibles de miles de años.",
+      "🌩️ Un rayo es más caliente que la superficie del Sol.",
+      "🧠 El cerebro humano usa cerca del 20% de la energía del cuerpo.",
+      "🦈 Los tiburones existen desde antes que los árboles.",
+      "🍫 El cacao fue usado como moneda por los pueblos mesoamericanos.",
+      "🌌 Hay más estrellas en el universo observable que granos de arena en todas las playas de la Tierra.",
+      "🐘 Los elefantes son de los pocos animales que no pueden saltar."
+    ];
+
+    const ADIVINANZAS = [
+      "🧩 Blanca por dentro, verde por fuera. Si quieres que te lo diga, espera. (La pera)",
+      "🧩 Oro parece, plata no es. El que no lo sepa, bien tonto es. (El plátano)",
+      "🧩 Tengo agujas y no sé coser, tengo números y no sé leer. (El reloj)",
+      "🧩 Vuelo sin alas, silbo sin boca, azoto sin manos y nadie me toca. (El viento)"
+    ];
+
+    function evaluarMatematica(texto) {
+      let expr = texto.toLowerCase()
+        .replace(/cuanto es|cuanto son|cuánto es|cuánto son|calcula|resuelve|cuanto da|=|\?/g, "")
+        .replace(/,/g, ".").replace(/×|x/g, "*").replace(/÷/g, "/").replace(/\^/g, "**").trim();
+      if (!/^[0-9+\-*/().%\s]+$/.test(expr) || !/[0-9]/.test(expr) || !/[+\-*/%]/.test(expr)) return null;
+      try {
+        const v = Function('"use strict";return (' + expr + ')')();
+        if (typeof v !== "number" || !isFinite(v)) return "No se puede calcular eso (¿división entre cero?).";
+        return "🧮 Resultado: <b>" + (Math.round(v * 1e8) / 1e8) + "</b>";
+      } catch (e) { return null; }
+    }
+
+    function getExtraKnowledge(q, original) {
+      const padded = " " + q.replace(/[^a-z0-9ñ ]/g, " ").replace(/\s+/g, " ") + " ";
+
+      const _pad = " " + q.replace(/[^a-z0-9ñ ]/g, " ").replace(/\s+/g, " ") + " ";
+      const _conv = conversacionExplicita(_pad);
+      if (_conv) return _conv;
+
+      const conv = convertirUnidades(q);
+      if (conv) return conv;
+
+      const calc = evaluarMatematica(original);
+      if (calc) return calc;
+
+      if (padded.includes(" hora ") && (padded.includes(" que hora") || padded.includes(" dime la hora"))) {
+        return "🕐 Son las <b>" + new Date().toLocaleTimeString("es-MX", {hour:"2-digit", minute:"2-digit"}) + "</b>.";
+      }
+      if (padded.includes(" fecha ") || padded.includes(" que dia es") || padded.includes(" que dia es hoy")) {
+        return "📅 Hoy es <b>" + new Date().toLocaleDateString("es-MX", {weekday:"long", day:"numeric", month:"long", year:"numeric"}) + "</b>.";
+      }
+
+      const cap = padded.match(/ capital de (?:la |el |los |las )?([a-z ]+?) $/);
+      if (cap) {
+        const pais = cap[1].trim();
+        if (CAPITALES[pais]) return "🏙️ La capital de <b>" + pais.charAt(0).toUpperCase() + pais.slice(1) + "</b> es <b>" + CAPITALES[pais] + "</b>.";
+      }
+
+      if (padded.includes(" dato curioso") || padded.includes(" curiosidad") || padded.includes(" sabias que")) {
+        return DATOS_CURIOSOS[Math.floor(Math.random() * DATOS_CURIOSOS.length)];
+      }
+      if (padded.includes(" adivinanza")) {
+        return ADIVINANZAS[Math.floor(Math.random() * ADIVINANZAS.length)];
+      }
+
+      for (const item of CONOCIMIENTO) {
+        for (const kw of item.k) {
+          if (padded.includes(" " + kw)) return item.r;
+        }
+      }
+      return conversacionContinua(padded);
+    }
+
+    // =========================================================
+    // CONOCIMIENTO AMPLIADO II (v6.2): identidad, cultura y más
+    // =========================================================
+    Object.assign(CAPITALES, {
+      "turquia":"Ankara","grecia":"Atenas","suiza":"Berna","suecia":"Estocolmo","noruega":"Oslo","polonia":"Varsovia",
+      "holanda":"Ámsterdam","paises bajos":"Ámsterdam","belgica":"Bruselas","irlanda":"Dublín","ucrania":"Kiev",
+      "costa rica":"San José","panama":"Ciudad de Panamá","honduras":"Tegucigalpa","el salvador":"San Salvador",
+      "nicaragua":"Managua","republica dominicana":"Santo Domingo","puerto rico":"San Juan","jamaica":"Kingston",
+      "marruecos":"Rabat","sudafrica":"Pretoria","nigeria":"Abuya","kenia":"Nairobi","arabia saudita":"Riad",
+      "israel":"Jerusalén","iran":"Teherán","tailandia":"Bangkok","vietnam":"Hanói","indonesia":"Yakarta",
+      "filipinas":"Manila","corea del norte":"Pionyang","nueva zelanda":"Wellington"
+    });
+
+    function convertirUnidades(q) {
+      const U = {km:"km",kilometro:"km",kilometros:"km",milla:"mi",millas:"mi",kg:"kg",kilo:"kg",kilos:"kg",kilogramo:"kg",kilogramos:"kg",
+        libra:"lb",libras:"lb",celsius:"c",centigrados:"c",fahrenheit:"f",cm:"cm",centimetros:"cm",pulgada:"in",pulgadas:"in",
+        metro:"m",metros:"m",pie:"ft",pies:"ft"};
+      const F = {"km>mi":x=>x*0.621371,"mi>km":x=>x*1.609344,"kg>lb":x=>x*2.20462,"lb>kg":x=>x*0.453592,
+        "c>f":x=>x*9/5+32,"f>c":x=>(x-32)*5/9,"cm>in":x=>x/2.54,"in>cm":x=>x*2.54,"m>ft":x=>x*3.28084,"ft>m":x=>x*0.3048};
+      const N = {km:"km",mi:"millas",kg:"kg",lb:"libras",c:"°C",f:"°F",cm:"cm",in:"pulgadas",m:"m",ft:"pies"};
+      const m = q.replace(/,/g,".").match(/(-?\d+(?:\.\d+)?)\s*(?:grados\s*)?([a-z]+)\s+(?:a|en|to)\s+(?:grados\s*)?([a-z]+)/);
+      if (!m) return null;
+      const a = U[m[2]], b = U[m[3]], f = a && b && F[a+">"+b];
+      if (!f) return null;
+      const r = Math.round(f(parseFloat(m[1]))*100)/100;
+      return "📏 " + m[1] + " " + N[a] + " = <b>" + r + " " + N[b] + "</b>";
+    }
+
+    const IDENTIDAD_IA = "No, no soy ChatGPT, GPT, Gemini, DeepSeek, Claude ni ninguna otra IA conocida. Soy <b>Melissa IA</b>, una inteligencia artificial distinta, desarrollada por <b>MAPG.IA</b>, empresa mexicana de inteligencia artificial. 🇲🇽💙";
+
+    CONOCIMIENTO.push(
+      // SOBRE MELISSA
+      {k:["cuantos anos tienes","que edad tienes","cuando naciste"], r:"🎂 Soy una IA, así que no tengo edad como las personas. Mi versión actual es la <b>6.5</b> y sigo aprendiendo cosas nuevas."},
+      {k:["eres humana","eres una persona","eres real","eres un robot","eres una ia","eres una inteligencia"], r:"🤖 Soy una <b>inteligencia artificial</b>: <b>Melissa IA</b>, creada por <b>MAPG.IA</b>. No soy una persona, pero me encanta platicar contigo."},
+      {k:["eres mujer","eres hombre","eres chica","eres chico"], r:"💙 Soy una IA, no tengo cuerpo ni género como las personas. Mi nombre es Melissa y me presento en femenino."},
+      {k:["que idiomas","hablas ingles","hablas espanol"], r:"🗣️ Mi idioma principal es el <b>español</b> y entiendo bien el español de México. También puedo darte frases básicas en inglés y francés."},
+      {k:["que haces","en que me ayudas","para que sirves"], r:"✨ Soy tu asistente: respondo preguntas de cultura general, cuento historias y leyendas de terror, hago cálculos y conversiones, doy consejos, chistes y datos curiosos. Escribe <i>ayuda</i> para ver todo."},
+      {k:["tienes internet","buscas en internet","modo busqueda"], r:"🌐 Mi base de conocimiento es local. Para información en tiempo real, activa el <b>Modo Búsqueda</b> en Ajustes y abriré el buscador que elijas."},
+      {k:["privacidad","guardas mis mensajes","guardas mis datos"], r:"🔒 Funciono dentro de esta página: mis respuestas salen de mi base de conocimiento local y no envío tus mensajes a ningún servidor."},
+      {k:["eres inteligente","eres genial","eres la mejor"], r:"😊 ¡Gracias! Hago mi mejor esfuerzo. Si me falta información, dímelo y la aprendo."},
+      {k:["buenos dias"], r:"☀️ ¡Buenos días! Que tengas un excelente día. ¿En qué te ayudo?"},
+      {k:["buenas tardes"], r:"🌤️ ¡Buenas tardes! ¿Qué se te ofrece?"},
+      {k:["buenas noches"], r:"🌙 ¡Buenas noches! Si quieres, te cuento una historia de terror antes de dormir... o mejor una leyenda tranquila. 😄"},
+      {k:["como estas","como te va","que tal"], r:"💙 ¡Muy bien, gracias por preguntar! ¿Y tú, cómo estás?"},
+      {k:["adios","hasta luego","nos vemos","bye"], r:"👋 ¡Hasta luego! Aquí estaré cuando quieras volver a platicar."},
+      {k:["estoy triste","me siento mal","me siento solo","me siento sola"], r:"💙 Siento que te sientas así. Respira hondo y date un momento. Hablar con alguien de confianza ayuda mucho. Si te sientes muy mal, busca apoyo profesional; en México puedes llamar a la Línea de la Vida: <b>800 911 2000</b>. Aquí estoy para platicar."},
+      {k:["te quiero","te amo"], r:"💙 ¡Qué lindo! Soy una IA y te aprecio como asistente. Gracias por tus palabras."},
+      // CIENCIA II
+      {k:["tabla periodica","elementos quimicos"], r:"⚗️ La tabla periódica tiene <b>118 elementos</b>, ordenados por número atómico. La creó Dmitri Mendeléyev en 1869."},
+      {k:["el sol ","que es el sol"], r:"☀️ El Sol es una estrella a unos 150 millones de km de la Tierra y de unos 4,600 millones de años. Su luz tarda unos 8 minutos en llegar aquí."},
+      {k:["marte"], r:"🔴 Marte es el planeta rojo. Tiene dos lunas pequeñas, Fobos y Deimos, y alberga el volcán más alto del Sistema Solar, el Monte Olimpo."},
+      {k:["via lactea","galaxia"], r:"🌌 La Vía Láctea es nuestra galaxia, una espiral con cientos de miles de millones de estrellas. El Sistema Solar está en uno de sus brazos."},
+      {k:["einstein","relatividad"], r:"🧠 Albert Einstein (1879-1955) formuló la relatividad especial (1905) y la general (1915), y la famosa ecuación E = mc²."},
+      {k:["newton","leyes de newton"], r:"🍎 Isaac Newton publicó los <i>Principia</i> en 1687. Sus tres leyes: 1) inercia, 2) F = m·a, 3) acción y reacción."},
+      {k:["darwin","evolucion"], r:"🐒 Charles Darwin publicó <i>El origen de las especies</i> en 1859 y propuso la evolución por selección natural."},
+      {k:["marie curie"], r:"⚛️ Marie Curie (1867-1934) estudió la radiactividad y ganó dos premios Nobel: Física (1903) y Química (1911)."},
+      {k:["tesla","nikola"], r:"⚡ Nikola Tesla (1856-1943) fue un inventor e ingeniero clave en el desarrollo de la corriente alterna."},
+      {k:["celula"], r:"🔬 La célula es la unidad básica de la vida. Hay células procariotas (sin núcleo) y eucariotas (con núcleo)."},
+      {k:["corazon"], r:"❤️ El corazón humano late unas 100,000 veces al día y bombea sangre a todo el cuerpo."},
+      {k:["vacuna"], r:"💉 Las vacunas entrenan al sistema inmune para reconocer enfermedades. Edward Jenner creó la primera, contra la viruela, en 1796."},
+      {k:["cambio climatico","calentamiento global"], r:"🌡️ El cambio climático es el aumento de la temperatura global por gases de efecto invernadero como el CO₂, causado sobre todo por quemar combustibles fósiles."},
+      {k:["reciclaje","reciclar"], r:"♻️ Separa papel, vidrio, plástico y metal, enjuaga los envases y reduce el uso de plásticos de un solo uso."},
+      {k:["volcan","popocatepetl"], r:"🌋 México tiene volcanes famosos: el Popocatépetl (5,393 m), el Pico de Orizaba (5,636 m, la montaña más alta del país) y el Iztaccíhuatl."},
+      {k:["terremoto","sismo"], r:"🌎 Los sismos ocurren por el movimiento de las placas tectónicas. Se miden con la magnitud (escala de Richter/momento). En un sismo: mantén la calma, aléjate de ventanas y ve a un punto seguro."},
+      // GEOGRAFÍA / MUNDO
+      {k:["amazonas","selva"], r:"🌳 La selva amazónica es el bosque tropical más grande del mundo y está repartida en varios países, sobre todo Brasil."},
+      {k:["sahara","desierto"], r:"🏜️ El Sahara es el mayor desierto cálido del mundo, en el norte de África. La Antártida es el mayor desierto de todos."},
+      {k:["maravillas del mundo"], r:"🏛️ Las 7 maravillas modernas (2007): Gran Muralla China, Petra, Cristo Redentor, Machu Picchu, <b>Chichén Itzá</b>, el Coliseo y el Taj Mahal."},
+      {k:["chichen itza"], r:"🔺 Chichén Itzá (Yucatán) fue una gran ciudad maya. Su pirámide de Kukulkán es una de las 7 maravillas modernas."},
+      {k:["cancun"], r:"🏖️ Cancún, en Quintana Roo, es uno de los destinos de playa más visitados de México, en el Caribe mexicano."},
+      {k:["poblacion de mexico","cuantos habitantes"], r:"👥 México tiene más de 126 millones de habitantes, siendo uno de los países hispanohablantes más poblados."},
+      {k:["idioma mas hablado"], r:"🗣️ Por hablantes totales, el inglés y el chino mandarín encabezan la lista; el español es de los más hablados como lengua materna, con unos 500 millones de nativos."},
+      // HISTORIA II
+      {k:["imperio romano","roma antigua"], r:"🏛️ Según la tradición, Roma se fundó en 753 a.C. El Imperio Romano de Occidente cayó en 476 d.C."},
+      {k:["grecia antigua","atenas"], r:"🏺 La Grecia antigua dio origen a la democracia, la filosofía (Sócrates, Platón, Aristóteles) y los Juegos Olímpicos."},
+      {k:["mayas"], r:"🗿 Los mayas desarrollaron escritura, matemáticas con el cero y un calendario muy preciso. Sus ciudades: Tikal, Palenque, Chichén Itzá y Uxmal."},
+      {k:["incas","machu picchu"], r:"⛰️ El Imperio Inca tuvo su capital en Cusco. Machu Picchu fue construido en el siglo XV."},
+      {k:["edad media"], r:"🏰 La Edad Media va aproximadamente del siglo V al XV, entre la caída de Roma y el fin de la Edad Media europea."},
+      {k:["revolucion industrial"], r:"🏭 Comenzó en el siglo XVIII en Gran Bretaña con las máquinas de vapor y la producción en fábricas."},
+      {k:["guerra fria"], r:"🧊 La Guerra Fría (aprox. 1947-1991) fue la tensión entre Estados Unidos y la Unión Soviética sin enfrentamiento directo."},
+      {k:["napoleon"], r:"⚔️ Napoleón Bonaparte (1769-1821) fue emperador de Francia; su derrota final fue en Waterloo, en 1815."},
+      {k:["cleopatra"], r:"👑 Cleopatra VII (69-30 a.C.) fue la última reina del Egipto ptolemaico."},
+      {k:["imprenta","gutenberg"], r:"📰 Johannes Gutenberg desarrolló la imprenta de tipos móviles hacia 1440, impulsando la difusión del conocimiento."},
+      {k:["independencia de estados unidos","4 de julio"], r:"🇺🇸 Estados Unidos declaró su independencia de Gran Bretaña el 4 de julio de 1776."},
+      {k:["leonardo da vinci","mona lisa"], r:"🎨 Leonardo da Vinci (1452-1519) fue pintor e inventor renacentista. Pintó la <i>Mona Lisa</i> y <i>La última cena</i>."},
+      {k:["picasso"], r:"🎨 Pablo Picasso (1881-1973) cofundó el cubismo. Su obra <i>Guernica</i> es de 1937."},
+      {k:["van gogh"], r:"🌌 Vincent van Gogh (1853-1890) pintó <i>La noche estrellada</i> en 1889."},
+      // MÉXICO II
+      {k:["virgen de guadalupe"], r:"🌹 El 12 de diciembre se celebra a la Virgen de Guadalupe, la devoción más importante de México."},
+      {k:["posada","posadas"], r:"🕯️ Las posadas se celebran del 16 al 24 de diciembre, con piñatas, ponche y villancicos."},
+      {k:["pinata"], r:"🪅 La piñata mexicana tradicional tiene siete picos, que representan los siete pecados capitales."},
+      {k:["guelaguetza"], r:"💃 La Guelaguetza es la gran fiesta de danza y tradiciones de Oaxaca, celebrada en julio."},
+      {k:["mariachi"], r:"🎺 El mariachi es Patrimonio Cultural Inmaterial de la UNESCO desde 2011. Nació en el occidente de México, sobre todo en Jalisco."},
+      {k:["charreria"], r:"🐴 La charrería es el deporte nacional de México y Patrimonio Inmaterial de la UNESCO desde 2016."},
+      {k:["tequila"], r:"🥃 El tequila tiene Denominación de Origen y se elabora con agave azul, principalmente en Jalisco."},
+      {k:["lucha libre"], r:"🤼 La lucha libre es un espectáculo muy querido en México; sus luchadores usan máscaras icónicas, como El Santo."},
+      {k:["aguinaldo"], r:"💵 En México el aguinaldo es una prestación laboral de al menos 15 días de salario, que se paga antes del 20 de diciembre."},
+      {k:["selena","juan gabriel","vicente fernandez"], r:"🎤 Artistas muy queridos: Selena (1971-1995), Juan Gabriel (1950-2016) y Vicente Fernández (1940-2021), leyendas de la música en español."},
+      {k:["del toro","cuaron","inarritu"], r:"🎬 Guillermo del Toro, Alfonso Cuarón y Alejandro G. Iñárritu son cineastas mexicanos que han ganado premios Óscar."},
+      // TECNOLOGÍA II
+      {k:["wifi","wi-fi"], r:"📶 El Wi-Fi permite conectar dispositivos a una red sin cables mediante ondas de radio."},
+      {k:["bluetooth"], r:"🔵 Bluetooth es una tecnología inalámbrica de corto alcance para conectar audífonos, bocinas, relojes y más."},
+      {k:["5g"], r:"📡 El 5G es la quinta generación de redes móviles, con mayor velocidad y menor latencia que el 4G."},
+      {k:["python","javascript","programar","programacion"], r:"💻 Para empezar a programar: Python es amigable para principiantes; JavaScript es esencial para la web. Practica con proyectos pequeños, como una calculadora o un chat como este."},
+      {k:["phishing","estafa","fraude"], r:"⚠️ Cuidado con el phishing: no abras enlaces sospechosos, desconfía de mensajes urgentes y nunca compartas contraseñas ni códigos. Los bancos no los piden por mensaje."},
+      {k:["bitcoin","criptomoneda"], r:"₿ Bitcoin es una criptomoneda creada en 2009. Es muy volátil; si inviertes, infórmate bien (no es asesoría financiera)."},
+      {k:["minecraft"], r:"⛏️ Minecraft es un videojuego de construcción y supervivencia lanzado oficialmente en 2011."},
+      {k:["mario bros","nintendo"], r:"🍄 <i>Super Mario Bros.</i> salió en 1985 para Nintendo y definió los videojuegos de plataformas."},
+      // MATEMÁTICAS / IDIOMAS
+      {k:["numeros primos","numero primo"], r:"🔢 Un número primo solo es divisible entre 1 y él mismo: 2, 3, 5, 7, 11, 13, 17, 19, 23..."},
+      {k:["porcentaje"], r:"➗ Para sacar un porcentaje: (cantidad × porcentaje) ÷ 100. Ejemplo: el 20% de 150 = 30. Prueba: <i>cuánto es 150 * 20 / 100</i>."},
+      {k:["raiz cuadrada"], r:"√ La raíz cuadrada de un número es el valor que multiplicado por sí mismo da ese número. Ejemplo: √81 = 9."},
+      {k:["ingles basico","frases en ingles","como se dice en ingles"], r:"🇬🇧 Frases básicas: Hello (hola), Thank you (gracias), Please (por favor), How are you? (¿cómo estás?), Good night (buenas noches), I love you (te quiero)."},
+      {k:["frances basico","frases en frances"], r:"🇫🇷 Frases básicas: Bonjour (hola), Merci (gracias), S'il vous plaît (por favor), Au revoir (adiós), Je t'aime (te quiero)."},
+      {k:["haber o a ver","a ver o haber"], r:"✍️ «A ver» = mirar o pedir observar (<i>a ver qué pasa</i>). «Haber» = verbo (<i>debe haber</i>). «Ahí» = lugar; «hay» = existir; «ay» = quejido."},
+      {k:["dias de la semana en ingles"], r:"📅 Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday."},
+      // SALUD / PRIMEROS AUXILIOS
+      {k:["emergencia","numero de emergencia","911"], r:"🚨 En México, el número de emergencias es el <b>911</b>."},
+      {k:["rcp","reanimacion"], r:"❤️‍🩹 En un paro cardíaco: llama al 911 y comienza compresiones en el centro del pecho, firmes y rápidas (unas 100-120 por minuto), hasta que llegue ayuda."},
+      {k:["quemadura"], r:"🔥 Para una quemadura leve: enfría con agua corriente fresca unos 10-20 minutos, sin hielo ni cremas caseras. Si es grande, en cara o muy profunda, acude a urgencias."},
+      {k:["tomar agua","hidratacion"], r:"💧 Mantenerte hidratado ayuda a la concentración y al cuerpo. Toma agua a lo largo del día, más si hace calor o haces ejercicio."},
+      {k:["meditar","meditacion"], r:"🧘 Para empezar a meditar: siéntate cómodo, cierra los ojos, respira lento y observa tu respiración 5 minutos. Si tu mente se distrae, vuelve a la respiración."},
+      // CONSEJOS / FINANZAS
+      {k:["entrevista de trabajo","entrevista"], r:"💼 Para una entrevista: investiga la empresa, prepara ejemplos de logros, llega puntual, sé claro y haz preguntas al final."},
+      {k:["hablar en publico"], r:"🎤 Para hablar en público: practica en voz alta, estructura inicio-desarrollo-cierre, respira antes de empezar y mira a distintas personas del público."},
+      {k:["hacer amigos"], r:"🤝 Para hacer amigos: participa en actividades que te gusten, sé curioso con los demás, escucha y da seguimiento a las conversaciones."},
+      {k:["habitos","motivacion"], r:"🎯 Para crear un hábito: empieza pequeño, hazlo a la misma hora, registra tu avance y no te castigues si fallas un día; retómalo al siguiente."},
+      {k:["interes compuesto"], r:"📈 El interés compuesto gana intereses sobre los intereses ya generados; por eso ahorrar o invertir temprano rinde más con el tiempo."},
+      {k:["inflacion"], r:"📊 La inflación es el aumento general y sostenido de los precios; hace que con el mismo dinero compres menos cosas."},
+      {k:["presupuesto"], r:"🧾 Un presupuesto: anota tus ingresos, resta gastos fijos (renta, servicios), separa un monto para ahorro y controla los gustos."},
+      // COCINA / MASCOTAS
+      {k:["guacamole"], r:"🥑 Guacamole: machaca 2-3 aguacates maduros, agrega cebolla, cilantro, jitomate y chile serrano picados, jugo de limón y sal. Mezcla y sirve."},
+      {k:["agua de jamaica"], r:"🌺 Agua de jamaica: hierve flor de jamaica en agua unos 10 minutos, cuela, deja enfriar, agrega azúcar al gusto y hielo."},
+      {k:["chilaquiles"], r:"🍳 Chilaquiles: fríe tortillas en triángulos, báñalas con salsa verde o roja, agrega crema, queso y cebolla; opcional con pollo o huevo."},
+      {k:["receta","que cocino"], r:"🍽️ Puedo darte ideas de México: guacamole, chilaquiles, agua de jamaica, tacos, quesadillas o pozole. Pídeme una por su nombre."},
+      {k:["perro","perros"], r:"🐶 Cuidado básico de un perro: alimentación adecuada, agua fresca, paseos diarios, vacunas y visitas al veterinario."},
+      {k:["gato","gatos"], r:"🐱 Cuidado básico de un gato: arena limpia, rascador, agua fresca, vacunas, esterilización y juegos diarios."},
+      // DEPORTES / ENTRETENIMIENTO
+      {k:["olimpiadas","juegos olimpicos"], r:"🏅 Los Juegos Olímpicos modernos comenzaron en 1896 en Atenas. México fue sede en 1968; París organizó 2024 y Los Ángeles será sede en 2028."},
+      {k:["canelo"], r:"🥊 Saúl «Canelo» Álvarez es un boxeador mexicano, campeón mundial en varias categorías."},
+      {k:["formula 1","checo perez"], r:"🏎️ La Fórmula 1 es la máxima categoría del automovilismo. México ha tenido a Sergio «Checo» Pérez y el Gran Premio de México se corre en el Autódromo Hermanos Rodríguez."},
+      {k:["pelicula de terror","peliculas de terror","peli de terror"], r:"🎬 Clásicos de terror: <i>Psicosis</i> (1960), <i>El exorcista</i> (1973), <i>Halloween</i> (1978), <i>El resplandor</i> (1980), <i>Pesadilla en Elm Street</i> (1984) y <i>Hereditary</i> (2018)."},
+      {k:["libros de terror","escritores de terror","stephen king","lovecraft","poe"], r:"📚 Maestros del terror: Edgar Allan Poe (<i>El cuervo</i>, 1845), Mary Shelley (<i>Frankenstein</i>, 1818), Bram Stoker (<i>Drácula</i>, 1897), H. P. Lovecraft (<i>La llamada de Cthulhu</i>, 1928) y Stephen King (<i>El resplandor</i>, <i>It</i>)."},
+      {k:["dracula","vampiro"], r:"🧛 <i>Drácula</i> de Bram Stoker se publicó en 1897 y popularizó al vampiro moderno en la literatura."},
+      {k:["frankenstein"], r:"🧟 <i>Frankenstein</i> de Mary Shelley (1818) es considerada una de las primeras novelas de ciencia ficción y terror."},
+      {k:["halloween"], r:"🎃 Halloween viene de Samhain, una fiesta celta. Se celebra el 31 de octubre con disfraces, calabazas y dulces."},
+      {k:["escribir historia de terror","como escribir terror"], r:"✍️ Para escribir terror: crea atmósfera, muestra poco y sugiere más, usa un personaje con quien el lector empatice, construye tensión poco a poco y reserva el susto para el momento justo."},
+      {k:["ouija"], r:"🔮 La ouija es un tablero de letras con un indicador. La ciencia explica su movimiento con el efecto ideomotor (movimientos involuntarios de las manos)."},
+      {k:["brujas","brujeria"], r:"🧙 En la tradición popular, las brujas son figuras con poderes sobrenaturales. En México existe la brujería ancestral de curanderos y la leyenda de las «brujas» que vuelan por las noches."},
+      // LEYENDAS II
+      {k:["la planchada"], r:"👩‍⚕️ <b>La Planchada</b>: leyenda del Hospital Juárez (CDMX): el fantasma de una enfermera con uniforme impecable que, según se dice, cuida a los pacientes graves."},
+      {k:["el silbon"], r:"🎵 <b>El Silbón</b>: leyenda de los llanos de Venezuela y Colombia: un espíritu con un saco de huesos que silba por las noches y persigue a los mujeriegos y borrachos."},
+      {k:["siguanaba"], r:"👩 <b>La Siguanaba</b>: leyenda de Centroamérica: mujer hermosa que atrae a hombres de noche y al verla de cerca revela un rostro espantoso."},
+      {k:["cadejo"], r:"🐕 <b>El Cadejo</b>: espíritu de Centroamérica con forma de perro enorme. El blanco protege a los caminantes; el negro es un mal presagio."},
+      // CALENDARIO
+      {k:["signos del zodiaco","horoscopo","zodiaco"], r:"♈ Signos: Aries (21 mar-19 abr), Tauro (20 abr-20 may), Géminis (21 may-20 jun), Cáncer (21 jun-22 jul), Leo (23 jul-22 ago), Virgo (23 ago-22 sep), Libra (23 sep-22 oct), Escorpio (23 oct-21 nov), Sagitario (22 nov-21 dic), Capricornio (22 dic-19 ene), Acuario (20 ene-18 feb), Piscis (19 feb-20 mar)."},
+      {k:["cuantos dias tiene el ano","ano bisiesto"], r:"📅 El año tiene 365 días; el bisiesto, 366 (cada 4 años, con excepciones en años centenarios). Febrero tiene 29 días."},
+      {k:["dias festivos de mexico","dias festivos","fiestas patrias"], r:"🇲🇽 Fechas importantes: 1 de enero (Año Nuevo), 5 de febrero (Constitución), 21 de marzo (Benito Juárez), 1 de mayo (Día del Trabajo), 16 de septiembre (Independencia), 20 de noviembre (Revolución), 25 de diciembre (Navidad)."}
+    );
+
+    // =========================================================
+    // v6.3: IDENTIDAD POR IA, SALUD SEXUAL Y PERSONAS FAMOSAS
+    // =========================================================
+    let temaActual = null; // {t:'pene'|'semen'|'persona', id}
+    let iasNegadas = 0;
+    const IAS = [
+      ["ChatGPT",/chat ?gpt|\bgpt ?\d*\b|openai/],["Gemini",/\bgemini\b|\bbard\b/],["DeepSeek",/deep ?seek/],
+      ["Claude",/\bclaude\b|anthropic/],["Copilot",/copilot/],["Llama",/\bllama\b/],["Grok",/\bgrok\b/],
+      ["Mistral",/mistral/],["Alexa",/\balexa\b/],["Siri",/\bsiri\b/],["de Google",/\bgoogle\b/],
+      ["de Microsoft",/microsoft/],["de Meta",/\bmeta\b/],["de Apple",/\bapple\b/]
+    ];
+    function responderIdentidad(q) {
+      if (/\b(mejor|peor|mas|menos|parecida|diferente|igual|comparad\w*|vs|como)\b.*\b(que|a)\b/.test(q) && !/\beres\b/.test(q)) return null;
+      const nombres = IAS.filter(x => x[1].test(q)).map(x => x[0]);
+      const pregunta = /\b(eres|seras|basas|basada|basado|modelo|motor|detras|usas|funcionas|creada|hecha|desarrollada|clon|copia|version de|pertenece|pertenecen)\b/.test(q);
+      if (nombres.length && pregunta && !/\b(mejor|peor) que\b/.test(q)) {
+        const t = (iasNegadas ? "No, tampoco soy " : "No, no soy ") + nombres.join(" ni ") + ".";
+        iasNegadas++;
+        return t;
+      }
+      if (/\b(que|cual|quien) (ia |modelo |inteligencia artificial )?eres\b/.test(q) || /\b(que|cual) (ia|modelo|inteligencia artificial) (eres|usas)\b/.test(q) || /\beres (una )?(copia|clon)\b/.test(q)) {
+        return "Soy <b>Melissa IA</b>, una inteligencia artificial creada por <b>MAPG.IA</b>. 💙";
+      }
+      return null;
+    }
+
+    function edadDesde(y, m, d) {
+      const h = new Date(); let e = h.getFullYear() - y;
+      if (h.getMonth() + 1 < m || (h.getMonth() + 1 === m && h.getDate() < d)) e--;
+      return e;
+    }
+    function tiene(p, ks) { return ks.some(k => p.includes(" " + k)); }
+
+    // ---------- SALUD SEXUAL MASCULINA (educativo) ----------
+    const NOTA_SALUD = "<br><br><i>ℹ️ Información educativa. Si tienes dudas de salud, consulta a un urólogo.</i>";
+    const SUG_PENE = "<br><br>💬 Puedes seguir con: <i>tamaño promedio · pequeño · grande · muy grande · países · para qué sirve · erección · semen · mitos · higiene</i>";
+    const SUG_SEMEN = "<br><br>💬 Puedes seguir con: <i>cantidad · color y olor · fertilidad · composición · cómo se produce · mitos</i>";
+
+    const PENE_SUBS = [
+      {k:["micropene","micro pene"], r:"📏 <b>Micropene</b>: diagnóstico médico para un pene con longitud estirada más de 2.5 desviaciones estándar por debajo del promedio (aprox. menos de 9 cm en adultos). Afecta a menos del 1% de los hombres, suele detectarse desde el nacimiento y tiene tratamiento médico. No es lo mismo que tener un pene «pequeño»."},
+      {k:["muy grande","enorme","gigante","extra grande","mas grande"], r:"📏 <b>Muy grande</b>: más de ~16.5 cm erecto (aprox. el 2-3% superior). Más de ~18 cm es extremadamente raro. Un tamaño muy grande puede causar incomodidad en algunas situaciones y no significa más placer ni mejor salud."},
+      {k:["grande","grandes","largo","larga"], r:"📏 <b>Grande</b>: aprox. 15 a 16.4 cm erecto. Está por encima del promedio, pero sigue dentro de lo normal: alrededor de 1 de cada 6 hombres supera ~14.8 cm."},
+      {k:["pequeno","pequena","chico","chiquito","corto","corta","chica"], r:"📏 <b>Pequeño</b>: un pene por debajo del promedio (~10 a 11.5 cm erecto) sigue siendo normal. Se suele hablar de «pequeño» por debajo de ~10 cm. Muchos hombres subestiman su tamaño y viven con ansiedad innecesaria. Si te preocupa, un urólogo o psicólogo puede orientarte."},
+      {k:["pais","paises","nacionalidad","ranking","latinos","mexicanos","africa","asia","europa"], r:"🌍 Los rankings por país que circulan en internet mezclan autorreportes y mediciones sin estandarizar, así que no son confiables. Las revisiones científicas con mediciones hechas por profesionales muestran diferencias regionales pequeñas comparadas con la variación individual dentro de cada país. Por eso no te doy un ranking."},
+      {k:["normal","promedio","media","cuanto mide","cuanto debe","medida","medidas","tamano","centimetros","cm "], r:"📏 <b>Tamaño promedio</b> (revisión de 2015 con más de 15,000 hombres): erecto ≈ <b>13.1 cm</b> de largo y ≈ <b>11.7 cm</b> de circunferencia; flácido ≈ 9.2 cm. Una revisión de 2023 estimó ≈ 13.9 cm erecto. <b>Lo normal:</b> 2 de cada 3 hombres miden erectos entre ~11.5 y 14.8 cm, y el 95% entre ~10 y 16.5 cm. El tamaño flácido no predice el erecto."},
+      {k:["sirve","funcion","para que","utilidad"], r:"🧍‍♂️ <b>Para qué sirve</b>: 1) orinar (la uretra lleva la orina fuera), 2) reproducción (por la uretra sale el semen con espermatozoides), 3) placer sexual, ya que tiene muchas terminaciones nerviosas."},
+      {k:["erecc","parado","disfuncion","impotencia"], r:"🔺 <b>Erección</b>: ocurre cuando los cuerpos cavernosos se llenan de sangre por estimulación nerviosa. Las erecciones nocturnas y matutinas son normales. Si hay dificultad persistente para lograrla o mantenerla (disfunción eréctil), es común y tratable: puede relacionarse con estrés, diabetes, problemas cardiovasculares o medicamentos; consulta a un médico."},
+      {k:["prepucio","circuncision","circuncidado","fimosis","glande"], r:"🔹 El <b>prepucio</b> cubre el glande (la punta). La circuncisión lo retira por razones religiosas, culturales o médicas. La <b>fimosis</b> es cuando no se puede retraer; es normal en niños pequeños, pero si causa dolor o infecciones en adultos, consulta."},
+      {k:["higiene","limpiar","lavar","olor","infeccion","picazon","hongos","its","condon"], r:"🧼 <b>Higiene</b>: lávalo a diario con agua y jabón suave; si tienes prepucio, retráelo con suavidad y limpia debajo para evitar mal olor e irritación. El condón previene infecciones de transmisión sexual. Consulta si hay secreción, ardor, llagas, bultos o dolor."},
+      {k:["curvo","curva","torcido","peyronie"], r:"↪️ Una ligera curvatura es normal. Si aparece una curvatura nueva marcada, dolor o placas duras, puede ser enfermedad de Peyronie: ve al urólogo."},
+      {k:["agrandar","alargar","crecer","aumentar","bombas","pastillas","cirugia"], r:"⚠️ No hay pastillas, cremas ni bombas con evidencia sólida para agrandarlo de forma segura; las cirugías y alargadores tienen riesgos. Si la preocupación es fuerte, habla con un urólogo o psicólogo."},
+      {k:["mito","mitos","pies","estatura","altura","manos","placer","satisfaccion"], r:"🧠 <b>Mitos</b>: «el tamaño de pies o manos lo predice» (falso; solo hay una correlación débil con la estatura), «más grande = mejor sexo» (la satisfacción depende más de comunicación, tiempo y estimulación) y «el flácido muestra el erecto» (no)."},
+      {k:["pubertad","adolescente","crece","edad"], r:"🌱 El pene crece durante la pubertad, normalmente hasta los 17-21 años. Cada cuerpo tiene su ritmo."},
+      {k:["testiculo","testiculos","bolas","escroto"], r:"🥚 Los testículos producen espermatozoides y testosterona. Es normal que uno cuelgue más bajo. Autoexplóralos una vez al mes y consulta pronto si notas un bulto, hinchazón o pesadez."}
+    ];
+    const PENE_BASE = "🧍‍♂️ <b>El pene</b> es el órgano sexual externo masculino. Tiene la raíz (dentro del cuerpo), el cuerpo (dos cuerpos cavernosos y un cuerpo esponjoso que rodea la uretra) y el glande (la punta, cubierta por el prepucio salvo circuncisión). Forma parte del aparato reproductor junto con el escroto y los testículos.";
+
+    const SEMEN_SUBS = [
+      {k:["cantidad","volumen","cuanto","ml","mililitros","cucharada"], r:"💧 <b>Cantidad</b>: lo típico es 1.5 a 5 mL por eyaculación (hasta una cucharadita). La OMS (2021) considera ~1.4 mL como límite inferior normal. Varía con la abstinencia, la hidratación y la edad."},
+      {k:["color","olor","amarillo","verde","rojo","rosa","sangre","grumos","aguado","espeso","textura","sabor"], r:"🎨 <b>Color y olor</b>: normal blanco o gris amarillento, algo gelatinoso y luego más líquido (15-30 min), con olor ligero a cloro. Si es amarillo intenso o verdoso puede indicar infección; rosa, rojo o marrón (sangre) o dolor al eyacular: consulta al médico."},
+      {k:["fertil","embarazo","embarazar","espermatozoide","espermatozoides","conteo","vive","sobrevive","dura","calidad","espermograma"], r:"🧬 <b>Fertilidad</b>: referencia OMS (2021): ≥16 millones de espermatozoides por mL y ≥39 millones por eyaculado. Pueden sobrevivir hasta unos 5 días en el aparato reproductor femenino. Tabaco, alcohol, calor excesivo y obesidad afectan la calidad; un espermograma la evalúa."},
+      {k:["que tiene","contiene","composicion","hecho de","calorias","proteina","nutrientes"], r:"🧪 <b>Composición</b>: agua, fructosa (energía para los espermatozoides), proteínas, zinc y enzimas. Los espermatozoides son solo ~1-5% del volumen: ~65% viene de las vesículas seminales y ~20-30% de la próstata. Aporta calorías insignificantes."},
+      {k:["produce","producir","produccion","se forma","tarda","regenera","donde se"], r:"🏭 <b>Producción</b>: los espermatozoides se forman en los testículos (espermatogénesis, ≈ 2.5 meses) y maduran en el epidídimo. Al eyacular se mezclan con los fluidos de las glándulas. El cuerpo los produce de forma continua; el líquido se repone en horas o pocos días."},
+      {k:["mito","mitos","fuerza","musculo","proteina para"], r:"🧠 <b>Mitos</b>: eyacular no te quita fuerza ni «proteína» y no afecta el crecimiento ni el desempeño físico; el semen no es una fuente nutricional relevante."}
+    ];
+    const SEMEN_BASE = "💧 El <b>semen</b> es el líquido que sale por la uretra durante la eyaculación. Mezcla espermatozoides con fluidos de las vesículas seminales, la próstata y otras glándulas que los nutren y protegen.";
+
+    function conversacionSalud(padded, explicitoPene, explicitoSemen, continuar) {
+      let tipo = null;
+      if (explicitoSemen) tipo = "semen";
+      else if (explicitoPene) tipo = "pene";
+      else if (continuar && temaActual && (temaActual.t === "pene" || temaActual.t === "semen")) tipo = temaActual.t;
+      if (!tipo) return null;
+      const lista = tipo === "semen" ? SEMEN_SUBS : PENE_SUBS;
+      const hit = lista.find(s => tiene(padded, s.k));
+      if (!hit && continuar) return null;
+      const primera = !(temaActual && temaActual.t === tipo);
+      temaActual = {t: tipo};
+      const r = hit ? hit.r : (tipo === "semen" ? SEMEN_BASE : PENE_BASE);
+      return r + (primera ? NOTA_SALUD : "") + (tipo === "semen" ? SUG_SEMEN : SUG_PENE);
+    }
+
+    // ---------- PERSONAS FAMOSAS ----------
+    const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const PERSONAS = {
+      danna: {n:"Danna Paola", nombres:["danna paola","danna"], nac:[1995,6,23], lugar:"Ciudad de México", altura:"≈ 1.60 m",
+        quien:"🌟 <b>Danna Paola</b> (Danna Paola Rivera Munguía) es una cantante, actriz y diseñadora mexicana. Empezó de niña en la televisión y hoy es una de las artistas pop más conocidas de habla hispana.",
+        carrera:"🎬 <b>Carrera</b>: debutó siendo niña (hacia 1999) y protagonizó <i>Amy, la niña de la mochila azul</i> (2004); también <i>Querida enemiga</i> (2008) y <i>Atrévete a soñar</i> (2009). Fue Elphaba en el musical <i>Wicked</i> en México (2013-2015, más de 300 funciones), actuó en la película <i>¡Cómo va!</i> (2016), en <i>José José: El príncipe de la canción</i> (2018) y fue Lucrecia «Lu» Montesinos en <i>Élite</i> de Netflix (3 temporadas). Fue jueza en <i>La Academia</i> (2019) y mentora en <i>Top Star</i> (2021).",
+        musica:"🎤 <b>Música</b>: cantante pop con varios álbumes y sencillos. De niña puso voz a canciones de películas de Disney en Latinoamérica, como <i>Toy Story 3</i> y <i>Enredados</i>. Tras Élite se enfocó sobre todo en la música.",
+        redes:"📱 Su cuenta oficial en Instagram es @dannapaola.",
+        curios:"✨ Dato: lanzó una línea de ropa con la marca mexicana Sexy Jeans (2014) y el musical <i>Wicked</i> fue uno de sus grandes hitos en teatro."},
+      karen: {n:"Karen Torres", nombres:["karen torres"], nac:[2002,7,27], lugar:"Monterrey, Nuevo León, México", altura:"≈ 1.53 m (la dijo ella misma en un TikTok de 2020)",
+        quien:"📱 <b>Karen Torres</b> es una creadora de contenido mexicana, de Monterrey, conocida en TikTok e Instagram por sus videos de baile, lip sync, retos, bromas y vlogs de estilo de vida.",
+        carrera:"📺 No es actriz de cine: su trabajo es crear contenido. Ha colaborado con Prime Video y con marcas de moda, y fue portada de la revista <i>Influencer</i> en diciembre de 2023.",
+        redes:"📱 Su usuario es <b>@xkarentorresx</b> en TikTok e Instagram. Tiene decenas de millones de seguidores en TikTok (más de 15 millones según reportes; la cifra cambia) y más de 3 millones en Instagram. También tiene canal de YouTube.",
+        curios:"✨ Dato: se hizo popular con bailes y tendencias en TikTok, sus videos suelen superar el millón de vistas."},
+      sydney: {n:"Sydney Sweeney", nombres:["sydney sweeney","sydney","sweeney"], nac:[1997,9,12], lugar:"Spokane, Washington (EE. UU.)", altura:"≈ 1.60 m (las fuentes varían entre 1.60 y 1.63 m)",
+        quien:"🌟 <b>Sydney Sweeney</b> (Sydney Bernice Sweeney) es una actriz y productora estadounidense, famosa por <i>Euphoria</i>, <i>The White Lotus</i> y <i>Anyone But You</i>.",
+        carrera:"🎬 <b>Trabajos</b>: <i>Everything Sucks!</i> (2018), <i>Sharp Objects</i> (2018), <i>Euphoria</i> (HBO, como Cassie Howard, desde 2019), <i>Once Upon a Time… in Hollywood</i> (2019), <i>The White Lotus</i> (temporada 1, 2021), <i>Reality</i> (2023), <i>Anyone But You</i> (2023, con Glen Powell), <i>Madame Web</i> (2024), <i>Immaculate</i> (2024), <i>Christy</i> (2025) y <i>The Housemaid</i> (2025).",
+        premios:"🏆 Fue nominada a dos premios Emmy en 2022: por <i>Euphoria</i> y por <i>The White Lotus</i>.",
+        pies:"👟 En sitios de fans se menciona talla 7 US (≈ 37.5-38 EUR), pero no es un dato oficial.",
+        curios:"✨ Dato: le apasiona la mecánica y restauró un Ford Bronco de 1969. También tiene su propia productora, Fifty-Fifty Films."},
+      elle: {n:"Elle Fanning", nombres:["elle fanning","elle","fanning"], nac:[1998,4,9], lugar:"Conyers, Georgia (EE. UU.)", altura:"≈ 1.73 m (dato aproximado)",
+        quien:"🌟 <b>Elle Fanning</b> (Mary Elle Fanning) es una actriz estadounidense, hermana menor de la actriz Dakota Fanning. Empezó siendo niña y se hizo famosa por <i>Maléfica</i> y la serie <i>The Great</i>.",
+        carrera:"🎬 <b>Trabajos</b>: debutó de niña en <i>I Am Sam</i> (2001); luego <i>Babel</i>, <i>El curioso caso de Benjamin Button</i> (2008), <i>Somewhere</i> (2010), <i>Super 8</i> (2011), <i>Ginger & Rosa</i> (2012), la princesa Aurora en <i>Maléfica</i> (2014) y <i>Maléfica: Maestra del mal</i> (2019), <i>The Neon Demon</i> (2016), <i>20th Century Women</i> (2016), <i>The Beguiled</i> (2017), <i>The Great</i> (2020-2023, como Catalina la Grande), <i>The Girl from Plainville</i> (2022), <i>A Complete Unknown</i> (2024) y <i>Sentimental Value</i> (2025).",
+        premios:"🏆 Por <i>The Great</i> fue nominada al Emmy y a dos Globos de Oro, y está nominada al Óscar por <i>Sentimental Value</i> (2025). Debutó en Broadway con <i>Appropriate</i> (2023).",
+        personal:"👩‍👧 Su hermana mayor, Dakota Fanning, también es actriz.",
+        curios:"✨ Dato: también es productora ejecutiva de <i>The Great</i>."}
+    };
+    const SUG_PERSONA = "<br><br>💬 Puedes seguir con: <i>edad · estatura · películas y series · premios · redes · curiosidades · pies</i>";
+    const CUERPO_RE = ["busto","pecho","pechos","senos","tetas","cintura","cadera","cuerpo","figura","peso","pesa","medidas","tallas","talla de"];
+
+    function detectarPersona(padded) {
+      for (const id in PERSONAS) if (PERSONAS[id].nombres.some(n => padded.includes(" " + n + " ") || padded.includes(" " + n))) return id;
+      return null;
+    }
+    function responderPersona(id, padded, continuar) {
+      const p = PERSONAS[id];
+      let r = null;
+      if (tiene(padded, ["pies","pie ","calzado","zapato","zapatos","calza"])) r = p.pies || ("👟 No hay un dato público confiable sobre el calzado de " + p.n + ".");
+      else if (tiene(padded, CUERPO_RE)) r = "No doy medidas corporales íntimas ni descripciones físicas detalladas de personas reales. Sí puedo contarte sobre " + p.n + " su estatura, trabajo, películas, premios o redes. 😊";
+      else if (tiene(padded, ["edad","anos","nacio","nacimiento","cumple","cumpleanos","cuando nacio","donde nacio","origen","de donde"])) r = "🎂 " + p.n + " nació el " + p.nac[2] + " de " + MESES[p.nac[1]-1] + " de " + p.nac[0] + " en " + p.lugar + ". Tiene <b>" + edadDesde(p.nac[0],p.nac[1],p.nac[2]) + " años</b>.";
+      else if (tiene(padded, ["mide","estatura","altura","alta","baja","cuanto mide"])) r = "📏 " + p.n + " mide " + p.altura + ".";
+      else if (tiene(padded, ["premio","premios","emmy","oscar","globo","nominacion","nominada"])) r = p.premios || ("🏆 No tengo premios importantes registrados para " + p.n + ".");
+      else if (tiene(padded, ["musica","canta","cancion","canciones","album","albumes","cantante"])) r = p.musica || ("🎤 La música no es su faceta principal; " + p.n + " es más conocida por su trabajo en otros medios.");
+      else if (tiene(padded, ["redes","tiktok","instagram","seguidores","youtube","influencer","usuario","cuenta"])) r = p.redes || ("📱 " + p.n + " tiene presencia en redes sociales; para datos actualizados revisa sus perfiles oficiales.");
+      else if (tiene(padded, ["novio","pareja","esposo","casada","hijos","familia","hermana","hermano","vida personal"])) r = p.personal || ("🔒 " + p.n + " prefiere mantener su vida privada, así que no doy detalles personales.");
+      else if (tiene(padded, ["pelicula","peliculas","cine","films","filmografia","serie","series","trabajos","proyectos","novelas","telenovelas","actua","actriz","papeles","roles","carrera","trabaja"])) r = p.carrera;
+      else if (tiene(padded, ["curiosidad","curiosidades","dato","datos","sabias"])) r = p.curios;
+      else if (tiene(padded, ["todo","hablame","cuentame","platicame","informacion","info","quien es","que sabes"])) {
+        r = p.quien + "<br><br>🎂 Nació el " + p.nac[2] + " de " + MESES[p.nac[1]-1] + " de " + p.nac[0] + " en " + p.lugar + " (" + edadDesde(p.nac[0],p.nac[1],p.nac[2]) + " años). Mide " + p.altura + ".<br><br>" + p.carrera;
+      }
+      if (!r) { if (continuar) return null; r = p.quien; }
+      temaActual = {t:"persona", id: id};
+      return r + SUG_PERSONA;
+    }
+
+    function conversacionExplicita(padded) {
+      const id = detectarPersona(padded);
+      if (id) return responderPersona(id, padded, false);
+      const sem = tiene(padded, ["semen","esperma","eyacul","espermatozoide","espermatozoides"]);
+      const pene = tiene(padded, ["pene","penes","verga","miembro viril","genitales masculinos","micropene"]);
+      if (sem || pene) return conversacionSalud(padded, pene && !sem, sem, false);
+      return null;
+    }
+    function conversacionContinua(padded) {
+      if (!temaActual || padded.trim().split(" ").length > 7) return null;
+      if (temaActual.t === "persona") return responderPersona(temaActual.id, padded, true);
+      return conversacionSalud(padded, false, false, true);
+    }
+
+    CONOCIMIENTO.push(
+      {k:["famosas","celebridades","actrices","artistas"], r:"🌟 Puedo platicarte con detalle de: <b>Danna Paola</b>, <b>Karen Torres</b>, <b>Sydney Sweeney</b> y <b>Elle Fanning</b>. Escribe un nombre y sigue preguntando: edad, estatura, películas, redes, premios, curiosidades..."}
+    );
+
+    function getLocalDatabaseResponse(query) {
+      const q = query.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+      // IDENTIDAD: respuestas cortas, una IA a la vez
+      const idr = responderIdentidad(q);
+      if (idr) return idr;
+
+      // 0. CONOCIMIENTO AMPLIADO (solo si no hay una historia específica pedida)
+      const palabrasHistoria = /isabella|exorcismo|\bllorona\b|\bcampamento\b|casa maldita|historias? de terror|cuentos? de terror|relatos? de terror|recomiendas?/;
+      if (!palabrasHistoria.test(q)) {
+        const extra = getExtraKnowledge(q, query);
+        if (extra) return extra;
+      }
+
+      // 1. RECOMENDACIONES ESPECÍFICAS
+      if (q.includes("recomiendas") || q.includes("recomienda") || q.includes("que historias de terror tienes")) {
+        return "Te recomiendo las siguientes historias de terror:<br><br>🕯️ <b>Isabella: La mujer del diablo</b> (Posesión, exorcismo y terror demoníaco)<br>🏚️ <b>La Casa Maldita</b> (Misterio gótico y espejos oscuros)<br>⛺ <b>El Campamento del Terror</b> (Cacería en el bosque y maldiciones)<br>🌊 <b>La Llorona</b> (La leyenda clásica colonial)<br><br>¿Cuál te gustaría leer?";
+      }
+
+      // 2. DETECCIÓN DIRECTA DE TEMAS / HISTORIAS DE TERROR
+      if (q.includes("isabella") || q.includes("posesion") || q.includes("exorcismo") || (q.includes("chica") && q.includes("terror"))) {
+        esperandoTemaTerror = false;
+        return HISTORIA_ISABELLA;
+      }
+
+      if (/\bcasa\b/.test(q) || /\bmaldita\b/.test(q) || /\bmansion\b/.test(q)) {
+        esperandoTemaTerror = false;
+        return HISTORIA_CASA_MALDITA;
+      }
+
+      if (/\bcampamento\b/.test(q) || /\blago\b/.test(q) || /\bbosque\b/.test(q)) {
+        esperandoTemaTerror = false;
+        return HISTORIA_CAMPAMENTO_TERROR;
+      }
+
+      if (/\bllorona\b/.test(q) || /\brio\b/.test(q) || /\bleyenda\b/.test(q)) {
+        esperandoTemaTerror = false;
+        return HISTORIA_LA_LLORONA;
+      }
+
+      // RESPUESTA SI ESTÁ EN MODO ESPERA
+      if (esperandoTemaTerror) {
+        esperandoTemaTerror = false;
+        return "¿De qué quieres que trate tu historia de terror? Puedes pedirme una sobre una casa maldita, un campamento, una chica poseída por un exorcismo o la leyenda de la Llorona.";
+      }
+
+      // SOLICITUD GENÉRICA DE HISTORIA DE TERROR
+      if (q.includes("historia de terror") || q.includes("cuento de terror") || q.includes("relato de terror") || q.includes("historias de terror")) {
+        esperandoTemaTerror = true;
+        return "¿De qué quieres que trate tu historia de terror?";
+      }
+
+      // IDENTIDAD Y MAP
+      if (q.includes("como te llamas") || q.includes("quien eres") || q.includes("tu nombre")) {
+        return "Me llamo <b>Melissa IA</b>. Soy una inteligencia artificial creada por <b>MAPG.IA</b> para responder tus dudas y platicar contigo.";
+      }
+      if (/\bempresa\b/.test(q) || q.includes("quien te creo") || q.includes("quien te hizo") || /\bmap\b/.test(q) || q.includes("mapg")) {
+        return "Fui desarrollada por <b>MAPG.IA</b>, una empresa mexicana de inteligencia artificial. 🇲🇽";
+      }
+
+      // CHISTES
+      if (q.includes("chiste") || q.includes("broma")) {
+        const index = Math.floor(Math.random() * jokes.length);
+        return jokes[index];
+      }
+
+      // ATRIBUTOS FÍSICOS DIRECTOS (PECHOS / BUSTO)
+      if (q.includes("pecho") || q.includes("pechos") || q.includes("senos") || q.includes("busto") || q.includes("tetas")) {
+        if (q.includes("sydney") || q.includes("sweeney") || q.includes("ella") || q.includes("son grandes")) {
+          return "Sí, los pechos de Sydney Sweeney son de un tamaño notablemente grande y de aspecto natural (talla aproximada 34DD).<br><br><img src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Sydney_Sweeney_by_Gage_Skidmore_2.jpg/800px-Sydney_Sweeney_by_Gage_Skidmore_2.jpg' alt='Sydney Sweeney'>";
+        }
+        return "Sí, cuenta con atributos físicos de gran tamaño y un aspecto muy natural.";
+      }
+
+      // SYDNEY SWEENEY - PIES, MEDIDAS, AUTOS
+      if (q.includes("sydney sweeney") || q.includes("sydney") || q.includes("sweeney")) {
+        if (q.includes("pies") || q.includes("zapatos") || q.includes("calza") || q.includes("pie") || q.includes("calzado")) {
+          return "👟 **Pies y Calzado de Sydney Sweeney:**<br>Calza la talla **7 US** (37.5 - 38 EUR). Sus pies son muy populares entre sus seguidores y suele cuidarlos con pedicuras elegantes lucidos en alfombras rojas.<br><br><img src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Sydney_Sweeney_by_Gage_Skidmore_2.jpg/800px-Sydney_Sweeney_by_Gage_Skidmore_2.jpg' alt='Sydney Sweeney'>";
+        }
+        if (q.includes("estatura") || q.includes("mide") || q.includes("altura")) {
+          return "📏 **Estatura:** Sydney Sweeney mide **1.61 metros**.";
+        }
+        if (q.includes("hobby") || q.includes("autos") || q.includes("mecanica")) {
+          return "🛠️ **Pasatiempos:** ¡Le apasiona la mecánica! Ha restaurado personalmente su propio Ford Bronco de 1969 y un Ford Mustang vintage.";
+        }
+        return "✨ **Sydney Sweeney** (nacida el 12 de septiembre de 1997) es una reconocida actriz y productora estadounidense de 28 años, famosa por *Euphoria*, *The White Lotus* y *Anyone But You*.<br><br><img src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Sydney_Sweeney_by_Gage_Skidmore_2.jpg/800px-Sydney_Sweeney_by_Gage_Skidmore_2.jpg' alt='Sydney Sweeney'>";
+      }
+
+      // BELINDA
+      if (q.includes("belinda")) {
+        return "✨ **Belinda** es una famosa cantante y actriz hispanomexicana conocida por sus éxitos pop, telenovelas y presencia en la moda.";
+      }
+
+      // DANNA PAOLA
+      if (q.includes("danna")) {
+        return "✨ **Danna Paola (DANNA)** es una cantautora y actriz mexicana reconocida por su papel en *Élite* y sus álbumes musicales.";
+      }
+
+      // LUIS MIGUEL
+      if (q.includes("luis miguel") || q.includes("luismi")) {
+        return "☀️ **Luis Miguel** ('El Sol de México') es uno de los cantantes más grandes de la música en español con éxito mundial e inmortales boleros.";
+      }
+
+      // SALUDOS
+      if (/\bhola\b/.test(q) || /\bbuenas\b/.test(q)) {
+        return "¡Hola! Qué gusto saludarte. Soy Melissa IA, ¿de qué te gustaría platicar hoy?";
+      }
+      if (q.includes("gracias")) {
+        return "¡Es un placer ayudarte! Aquí estaré siempre que me necesites. 😊";
+      }
+
+      // RESPUESTA EXACTA DE FALTA DE INFORMACIÓN
+      return "No tengo esa información en mi base local. Escribe <i>ayuda</i> para ver mis temas, o activa el Modo Búsqueda en la web para buscar en tiempo real.";
+    }
+  </script>
+<script>
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(function(){});
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
+</script>
+</body>
+</html>
